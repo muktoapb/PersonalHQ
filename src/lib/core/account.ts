@@ -2,6 +2,7 @@ import "server-only";
 import { eq } from "drizzle-orm";
 import { db } from "@/db/client";
 import { loginAttempts, settings } from "@/db/schema";
+import { revokeAllStatements } from "@/lib/mcp/oauth";
 import { hashSecret, newSecret, verifySecret } from "@/lib/secrets";
 import { checkPassword, hashKey, newRecoveryKey, normalizeKey, usernameSchema } from "./credentials";
 import { getSettings } from "./settings";
@@ -65,11 +66,15 @@ export async function resetWithRecoveryKey(
   if (bad) return fail(bad);
   const sessionSecret = newSecret();
   const recoveryKey = newRecoveryKey();
-  await db
-    .update(settings)
-    // a reset may follow a compromise: also revoke AI-assistant access
-    .set({ passwordHash: await hashSecret(password), sessionSecret, recoveryHash: await hashKey(recoveryKey), mcpTokenHash: null })
-    .where(eq(settings.id, 1));
+  // A reset may follow a compromise: also revoke AI-assistant access (the
+  // token and every app connected by sign-in).
+  await db.batch([
+    db
+      .update(settings)
+      .set({ passwordHash: await hashSecret(password), sessionSecret, recoveryHash: await hashKey(recoveryKey), mcpTokenHash: null })
+      .where(eq(settings.id, 1)),
+    ...revokeAllStatements(),
+  ]);
   return { ok: true, sessionSecret, recoveryKey };
 }
 

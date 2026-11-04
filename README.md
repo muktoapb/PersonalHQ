@@ -99,20 +99,23 @@ Everything else (your account, currency, MCP access) lives in the database and i
 
 - *Settings › Profile* lets you change your username and password, make a new recovery key and sign out other devices.
 - The MCP token is shown once and only its hash is stored; creating or replacing it needs your password, and a password reset revokes it.
+- Apps connected by sign-in use OAuth 2.1 with PKCE: approving one needs your password (with the sign-in lockout), access tokens last an hour, refresh tokens rotate on every use, and only hashes are stored. A password reset disconnects every app.
 - Security headers stop the app being framed by other sites (clickjacking) and MIME sniffing.
 
 Found a security issue? Please report it privately through GitHub's security advisories instead of a public issue.
 
 ## Connect an AI assistant (MCP)
 
-In **Settings › MCP**, create a token, then add the server to your client. With Claude Code:
+**Claude (web, desktop, mobile) and other OAuth apps:** add a custom connector with the URL `https://your-host/api/mcp`. The app opens a PersonalHQ page where you approve it with your password. Connected apps are listed in **Settings › MCP**, each with a Disconnect button.
+
+**Claude Code and clients that take a header:** in **Settings › MCP**, create a token, then add the server. With Claude Code:
 
 ```bash
 claude mcp add --transport http personalhq https://your-host/api/mcp \
   --header "Authorization: Bearer YOUR_TOKEN"
 ```
 
-Other clients that support remote MCP servers with custom headers can use the same URL and header. The endpoint is stateless Streamable HTTP; revoking the token disconnects every client.
+Other clients that support remote MCP servers with custom headers can use the same URL and header. The endpoint is stateless Streamable HTTP; revoking the token disconnects every client that uses it.
 
 ## Development
 

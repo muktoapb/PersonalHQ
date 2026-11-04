@@ -4,6 +4,12 @@ All notable changes to PersonalHQ. Versions follow [Semantic Versioning](https:/
 
 ## [Unreleased]
 
+### Added
+- **Sign-in for MCP apps (OAuth 2.1)** — Claude's custom connectors and other OAuth clients can connect with just the URL: they register themselves, you approve them with your password, and they get short-lived, rotating tokens. Connected apps are listed in Settings › MCP with a Disconnect button; a password reset disconnects them all.
+
+### Fixed
+- MCP requests from hosted agents that send an `Origin` header (e.g. Muse) were refused with 403; the bearer token is now the only check.
+
 ### Changed
 - Analytics: "Last 3 months" and "Last 6 months" are rolling windows (4 Aug – 4 Nov), not calendar months.
 

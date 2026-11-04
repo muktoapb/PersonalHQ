@@ -4,7 +4,7 @@ import { and, eq, gt, isNull, lt, sql } from "drizzle-orm";
 import { z } from "zod";
 import { db } from "@/db/client";
 import { oauthClients, oauthCodes, oauthTokens } from "@/db/schema";
-import { type Result, fail } from "@/lib/core/result";
+import type { Result } from "@/lib/core/result";
 
 // OAuth 2.1 for the MCP endpoint, as MCP clients (Claude's connectors and
 // others) expect: dynamic client registration, authorization code + PKCE

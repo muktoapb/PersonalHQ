@@ -71,6 +71,10 @@ await db.batch([
     args: [await hashSecret(password), randomBytes(32).toString("hex"), await hashSecret(key.replace(/-/g, ""))],
   },
   "delete from login_attempts",
+  // apps connected by sign-in (OAuth) must approve again
+  "delete from oauth_tokens",
+  "delete from oauth_codes",
+  "delete from oauth_clients",
 ]);
-console.log("\nPassword changed. Every device has been signed out and AI-assistant (MCP) access was revoked.");
+console.log("\nPassword changed. Every device has been signed out and AI-assistant (MCP) access was revoked, including connected apps.");
 console.log(`\nNew recovery key (save it now, it won't be shown again):\n\n  ${key}\n`);

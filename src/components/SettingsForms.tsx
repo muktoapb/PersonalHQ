@@ -5,6 +5,8 @@ import { useActionState, useEffect, useRef, useState, useTransition } from "reac
 import type { Label, Settings } from "@/db/schema";
 import { financePrefsAction, passwordAction, profileAction, signOutOthersAction, weekStartAction } from "@/lib/actions/auth";
 import { createMcpTokenAction, importBackupAction, revokeMcpTokenAction } from "@/lib/actions/data";
+import { disconnectAppAction } from "@/lib/actions/oauth";
+import type { Connection } from "@/lib/mcp/oauth";
 import { emptyArchiveAction } from "@/lib/actions/notes";
 import { deleteLabelAction, updateLabelAction } from "@/lib/actions/tasks";
 import { setPaletteAction, setThemeAction } from "@/lib/actions/theme";
@@ -345,7 +347,7 @@ export function ImportBackup() {
 
 // ---------- MCP ----------
 
-function CopyBlock({ label, value }: { label: string; value: string }) {
+export function CopyBlock({ label, value }: { label: string; value: string }) {
   const [copied, setCopied] = useState(false);
   return (
     <div className="space-y-1">
@@ -358,6 +360,36 @@ function CopyBlock({ label, value }: { label: string; value: string }) {
       </div>
       <pre className="overflow-x-auto whitespace-pre rounded-2xl border border-rule bg-surface-2 p-3 text-xs leading-relaxed">{value}</pre>
     </div>
+  );
+}
+
+// Apps connected by signing in (OAuth), each with its own disconnect.
+export function ConnectedApps({ apps, locale }: { apps: Connection[]; locale: string }) {
+  const [confirm, setConfirm] = useState<string | null>(null);
+  const [pending, start] = useTransition();
+  const date = (d: string | number) => new Date(d).toLocaleDateString(locale, { day: "numeric", month: "short", year: "numeric" });
+  if (!apps.length) return <p className="rounded-2xl border border-dashed border-rule px-3 py-4 text-center text-sm text-ink-3">No apps connected yet.</p>;
+  return (
+    <ul className="divide-y divide-rule rounded-2xl border border-rule">
+      {apps.map((a) => (
+        <li key={a.id} className="flex flex-wrap items-center gap-3 px-3 py-2.5">
+          <div className="min-w-0 flex-1">
+            <p className="truncate text-sm font-medium">{a.name}</p>
+            <p className="truncate text-xs text-ink-3">
+              {a.redirectHost && `${a.redirectHost} · `}connected {date(a.approvedAt)}{a.lastUsedAt ? ` · last used ${date(a.lastUsedAt)}` : ""}
+            </p>
+          </div>
+          {confirm === a.id ? (
+            <span className="flex gap-1.5">
+              <button disabled={pending} onClick={() => start(async () => { await disconnectAppAction(a.id); setConfirm(null); })} className="btn btn-danger px-3 py-1.5 text-xs">Disconnect</button>
+              <button onClick={() => setConfirm(null)} className="btn btn-ghost px-3 py-1.5 text-xs">Cancel</button>
+            </span>
+          ) : (
+            <button onClick={() => setConfirm(a.id)} className="btn btn-ghost px-3 py-1.5 text-xs text-danger">Disconnect</button>
+          )}
+        </li>
+      ))}
+    </ul>
   );
 }
 
@@ -423,7 +455,6 @@ export function McpAccess({ endpoint, hasToken }: { endpoint: string; hasToken: 
 
       <div className="space-y-3 border-t border-rule pt-5">
         <h3 className="text-sm font-semibold">Connect</h3>
-        <CopyBlock label="Endpoint (Streamable HTTP)" value={endpoint} />
         <CopyBlock label="Claude Code" value={`claude mcp add --transport http personalhq ${endpoint} \\\n  --header "Authorization: Bearer ${shown}"`} />
         <CopyBlock label="Other clients (.mcp.json style)" value={json} />
         <p className="text-xs text-ink-3">The assistant must be able to reach this address. A localhost address only works on this computer; use your server&apos;s HTTPS address elsewhere.</p>

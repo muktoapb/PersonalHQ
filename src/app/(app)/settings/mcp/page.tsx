@@ -1,24 +1,39 @@
 import { headers } from "next/headers";
-import { McpAccess } from "@/components/SettingsForms";
+import { ConnectedApps, CopyBlock, McpAccess } from "@/components/SettingsForms";
 import { requireSession } from "@/lib/auth";
+import { listConnections } from "@/lib/mcp/oauth";
 import { TOOL_AREAS } from "@/lib/mcp/server";
+import { mcpUrl } from "@/lib/origin";
 
 export const metadata = { title: "MCP · Settings" };
 
 export default async function McpSettings() {
   const s = await requireSession();
-  const h = await headers();
-  const host = h.get("x-forwarded-host") ?? h.get("host") ?? "localhost:3000";
-  const proto = h.get("x-forwarded-proto") ?? (host.startsWith("localhost") || host.startsWith("127.") ? "http" : "https");
+  const endpoint = mcpUrl(await headers());
+  const apps = await listConnections();
   return (
     <>
       <h1 className="text-3xl font-semibold">MCP</h1>
       <section className="card space-y-4">
         <div>
-          <h2 className="font-semibold">AI assistant access</h2>
-          <p className="text-sm text-ink-2">Let Claude and other MCP clients read and update your dashboard with a private access token.</p>
+          <h2 className="font-semibold">Connect with sign-in</h2>
+          <p className="text-sm text-ink-2">
+            For Claude (web, desktop and mobile) and other apps that support OAuth: add a custom connector with this URL. The app opens a
+            PersonalHQ page where you approve it with your password.
+          </p>
         </div>
-        <McpAccess endpoint={`${proto}://${host}/api/mcp`} hasToken={!!s.mcpTokenHash} />
+        <CopyBlock label="Connector URL" value={endpoint} />
+        <div className="space-y-2">
+          <h3 className="text-sm font-semibold">Connected apps</h3>
+          <ConnectedApps apps={apps} locale={s.locale} />
+        </div>
+      </section>
+      <section className="card space-y-4">
+        <div>
+          <h2 className="font-semibold">Access token</h2>
+          <p className="text-sm text-ink-2">For Claude Code and clients that let you set a header: one private token, no sign-in page.</p>
+        </div>
+        <McpAccess endpoint={endpoint} hasToken={!!s.mcpTokenHash} />
       </section>
       <section className="card space-y-3">
         <h2 className="font-semibold">Tools <span className="font-normal text-ink-3">· {Object.values(TOOL_AREAS).flat().length}</span></h2>
