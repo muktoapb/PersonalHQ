@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from "next";
 import { Lexend } from "next/font/google";
 import { cookies } from "next/headers";
 import { ServiceWorker } from "@/components/Pwa";
+import { ThemeColor } from "@/components/ThemeColor";
 import { isPalette } from "@/lib/palettes";
 import "./globals.css";
 
@@ -20,7 +21,8 @@ export const viewport: Viewport = {
   initialScale: 1,
   viewportFit: "cover",
   themeColor: [
-    // phones: matches the app background (--app) behind the status bar
+    // phones: the app background (--app) behind the status bar; ThemeColor
+    // then follows the app's own light/dark and colour theme
     { media: "(prefers-color-scheme: light)", color: "#f3f3fb" },
     { media: "(prefers-color-scheme: dark)", color: "#13122a" },
   ],
@@ -38,6 +40,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
       <body className="min-h-dvh antialiased">
         {children}
         <ServiceWorker />
+        <ThemeColor />
       </body>
     </html>
   );

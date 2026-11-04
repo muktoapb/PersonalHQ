@@ -120,6 +120,13 @@
       "when": 1793769527934,
       "tag": "0016_pretty_anthem",
       "breakpoints": true
+    },
+    {
+      "idx": 17,
+      "version": "6",
+      "when": 1793778173674,
+      "tag": "0017_nostalgic_firelord",
+      "breakpoints": true
     }
   ]
 }

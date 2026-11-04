@@ -13,7 +13,8 @@ const LOCK_OPTIONS = [
 
 const pinInput = "input text-center text-2xl tracking-[0.5em] tabular-nums";
 
-// The lock screen's form.
+// The lock screen's form: it checks the PIN as soon as the 4th digit is in.
+// (After a wrong PIN, React resets the form, so the field is empty again.)
 export function UnlockForm({ next }: { next: string }) {
   const [state, action, pending] = useActionState(unlockAction, {});
   return (
@@ -21,11 +22,18 @@ export function UnlockForm({ next }: { next: string }) {
       <form action={action} className="space-y-3">
         <input type="hidden" name="next" value={next} />
         <input
-          name="pin" type="password" inputMode="numeric" pattern="\d{4,6}" minLength={4} maxLength={6} required autoFocus
+          name="pin" type="password" inputMode="numeric" pattern="\d{4}" minLength={4} maxLength={4} required autoFocus
           autoComplete="off" aria-label="PIN" placeholder="••••" className={pinInput}
+          onInput={(e) => {
+            // stays enabled (and focused) so you can retype straight after a wrong PIN
+            const el = e.currentTarget;
+            el.value = el.value.replace(/\D/g, "").slice(0, 4);
+            if (el.value.length === 4 && !pending) el.form?.requestSubmit();
+          }}
         />
-        {state.error && <p role="alert" className="text-sm text-danger">{state.error}</p>}
-        <button disabled={pending} className="btn btn-primary w-full">{pending ? "Checking…" : "Unlock"}</button>
+        <p role={state.error ? "alert" : "status"} className={`h-5 text-sm ${state.error ? "text-danger" : "text-ink-3"}`}>
+          {pending ? "Checking…" : state.error}
+        </p>
       </form>
       <form action={usePasswordAction}>
         <button className="text-sm text-accent-text hover:underline">Forgot your PIN? Use your password</button>
@@ -40,12 +48,12 @@ function SetPinForm({ change }: { change: boolean }) {
     <form action={action} className="space-y-3">
       <div className="grid gap-3 sm:grid-cols-2">
         <div>
-          <label className="label" htmlFor="pin">{change ? "New PIN" : "PIN"} (4–6 digits)</label>
-          <input id="pin" name="pin" type="password" inputMode="numeric" pattern="\d{4,6}" minLength={4} maxLength={6} required autoComplete="off" className="input tabular-nums" />
+          <label className="label" htmlFor="pin">{change ? "New PIN" : "PIN"} (4 digits)</label>
+          <input id="pin" name="pin" type="password" inputMode="numeric" pattern="\d{4}" minLength={4} maxLength={4} required autoComplete="off" className="input tabular-nums" />
         </div>
         <div>
           <label className="label" htmlFor="pin-confirm">Confirm PIN</label>
-          <input id="pin-confirm" name="confirm" type="password" inputMode="numeric" pattern="\d{4,6}" minLength={4} maxLength={6} required autoComplete="off" className="input tabular-nums" />
+          <input id="pin-confirm" name="confirm" type="password" inputMode="numeric" pattern="\d{4}" minLength={4} maxLength={4} required autoComplete="off" className="input tabular-nums" />
         </div>
       </div>
       <div>

@@ -1,0 +1,1 @@
+ALTER TABLE `settings` ADD `notices_seen_at` text;

@@ -4,13 +4,12 @@ import { formatMoney } from "@/lib/money";
 import { StatCard } from "./StatCard";
 
 // This period's flow.
-export function FinanceSummary({ period, periodLabel, s }: { period: Summary; periodLabel: string; s: Settings }) {
+export function FinanceSummary({ period, s }: { period: Summary; s: Settings }) {
   const fmt = (m: number) => formatMoney(m, s.currency, s.locale, s.currencySymbol);
   const rate = (x: Summary) => (x.income ? `${Math.round((x.savings / x.income) * 100)}% of income` : undefined);
   return (
     <div className="space-y-6">
       <section>
-        <h2 className="mb-3 text-[15px] font-medium text-ink-2">{periodLabel}</h2>
         <div className="grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-4">
           <StatCard icon="income" label="Income" value={fmt(period.income)} color="var(--income)" />
           <StatCard icon="expense" label="Expenses" value={fmt(period.spentExpense)} color="var(--expense)" />

@@ -40,7 +40,7 @@ export default async function TrackerPage({ params }: Props) {
     <div className="mx-auto max-w-4xl space-y-5">
       <div className="flex flex-wrap items-center gap-3">
         <div className="flex min-w-0 basis-full items-center gap-3 sm:basis-0 sm:flex-1">
-          <AppIcon name={t.icon} size={48} color={t.color} />
+          <span className="hidden lg:block"><AppIcon name={t.icon} size={48} color={t.color} /></span>
           <div className="min-w-0">
             <h1 className="truncate text-3xl font-semibold">{t.name}</h1>
             <p className="text-sm text-ink-3">{subtitle}</p>

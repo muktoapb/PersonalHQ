@@ -65,7 +65,7 @@ export default async function AnalyticsPage({ searchParams }: { searchParams: Pr
       {/* header + range */}
       <div className="flex flex-wrap items-end justify-between gap-4">
         <div className="flex min-w-0 flex-1 items-center gap-3">
-          <AppIcon name="analytics" size={48} />
+          <span className="hidden lg:block"><AppIcon name="analytics" size={48} /></span>
           <div className="min-w-0">
             <h1 className="text-3xl font-semibold">Analytics</h1>
             <p className="mt-1 text-sm text-ink-3">{r.label} · compared with the {r.key === "month" ? "same days last month" : "period before"}</p>

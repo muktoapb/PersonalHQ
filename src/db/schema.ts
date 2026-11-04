@@ -36,6 +36,8 @@ export const settings = sqliteTable("settings", {
   manageDonation: integer("manage_donation", { mode: "boolean" }).notNull().default(true),
   manageInvestment: integer("manage_investment", { mode: "boolean" }).notNull().default(true),
   mcpTokenHash: text("mcp_token_hash"),
+  // Last time the notification list was opened: newer notices count as unread.
+  noticesSeenAt: text("notices_seen_at"),
   // First day of the week for weekly tracker periods/streaks: 0 Sun, 1 Mon, 6 Sat.
   weekStart: integer("week_start").notNull().default(1),
   createdAt: createdAt(),

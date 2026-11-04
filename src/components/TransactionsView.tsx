@@ -46,7 +46,7 @@ export async function TransactionsView({ kind, params, s }: { kind: TransactionK
     <div className="mx-auto max-w-3xl space-y-6">
       <div className="flex flex-wrap items-end justify-between gap-3">
         <div className="flex items-center gap-3">
-          <AppIcon name={meta.icon} size={48} />
+          <span className="hidden lg:block"><AppIcon name={meta.icon} size={48} /></span>
           <div>
             <h1 className="text-3xl font-semibold">{meta.plural}</h1>
             <p className="mt-1 text-sm text-ink-3">

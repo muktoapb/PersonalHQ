@@ -100,7 +100,7 @@ export function GroupHeader({ group, labels, labelId }: {
     <div className="space-y-3">
       <div className="flex flex-wrap items-center gap-3">
         <div className="flex min-w-0 basis-full items-center gap-3 sm:basis-0 sm:flex-1">
-          <AppIcon name={group.icon} size={48} color={group.color} />
+          <span className="hidden lg:block"><AppIcon name={group.icon} size={48} color={group.color} /></span>
           <h1 className="min-w-0 truncate text-3xl font-semibold">{group.name}</h1>
           <SectionFilterButton label="Task groups" />
         </div>

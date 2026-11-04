@@ -39,7 +39,7 @@ export default async function WalletPage({ params, searchParams }: Props) {
     <div className="mx-auto max-w-3xl space-y-6">
       <div className="flex flex-wrap items-center gap-3">
         <div className="flex min-w-0 basis-full items-center gap-3 sm:basis-0 sm:flex-1">
-          <AppIcon name={meta.icon} size={52} color={w.color} />
+          <span className="hidden lg:block"><AppIcon name={meta.icon} size={52} color={w.color} /></span>
           <div className="min-w-0">
             <h1 className="flex items-center gap-2 truncate text-3xl font-semibold">
               {w.name}

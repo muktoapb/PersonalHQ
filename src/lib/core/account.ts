@@ -118,9 +118,9 @@ export async function regenerateRecoveryKey(password: string): Promise<Result<{ 
 
 export const LOCK_MINUTES = [1, 5, 15, 60] as const;
 
-// 4–6 digits, and not one digit repeated or a straight run (1234, 9876).
+// 4 digits, and not one digit repeated or a straight run (1234, 9876).
 export function checkPin(pin: string): string | null {
-  if (!/^\d{4,6}$/.test(pin)) return "Use 4 to 6 digits.";
+  if (!/^\d{4}$/.test(pin)) return "Use 4 digits.";
   const d = [...pin].map(Number);
   const step = d[1] - d[0];
   if (Math.abs(step) <= 1 && d.every((x, i) => i === 0 || x - d[i - 1] === step)) return "Pick a PIN that's harder to guess.";

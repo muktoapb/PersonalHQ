@@ -2,7 +2,7 @@
 
 import { ArrowClockwise, Funnel } from "@phosphor-icons/react/ssr";
 import { usePathname, useRouter } from "next/navigation";
-import { useEffect, useState, useSyncExternalStore, useTransition, ViewTransition } from "react";
+import { useEffect, useState, useTransition, ViewTransition } from "react";
 import { haptic } from "@/lib/haptics";
 
 // App behaviour for the signed-in shell on phones and portrait tablets.
@@ -130,13 +130,6 @@ export function SheetGestures() {
   }, []);
   return null;
 }
-
-// True once the page has scrolled past `y` (for the compact top-bar title).
-const onScroll = (cb: () => void) => {
-  window.addEventListener("scroll", cb, { passive: true });
-  return () => window.removeEventListener("scroll", cb);
-};
-export const useScrolledPast = (y: number) => useSyncExternalStore(onScroll, () => window.scrollY > y, () => false);
 
 // ---------- section menu (phones) ----------
 // SideNav owns the sheet listing a section's pages (task groups, note

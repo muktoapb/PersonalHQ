@@ -28,7 +28,7 @@ export default async function WalletsPage() {
     <div className="mx-auto max-w-5xl space-y-6">
       <div className="flex flex-wrap items-end justify-between gap-3">
         <div className="flex items-center gap-3">
-          <AppIcon name="wallets" size={48} />
+          <span className="hidden lg:block"><AppIcon name="wallets" size={48} /></span>
           <div>
             <h1 className="text-3xl font-semibold">Wallets</h1>
             <p className="mt-1 text-sm text-ink-3">Bank accounts, cash and mobile wallets — and what&apos;s in each.</p>

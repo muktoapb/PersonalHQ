@@ -14,7 +14,7 @@ export async function NotesScreen({ category, archived = false, q }: { category?
   return (
     <div className="mx-auto max-w-6xl space-y-6">
       <div className="flex flex-wrap items-center gap-3">
-        {category ? <AppIcon name={category.icon} size={48} color={category.color} /> : <AppIcon name={archived ? "archive" : "notes"} size={48} />}
+        <span className="hidden lg:block">{category ? <AppIcon name={category.icon} size={48} color={category.color} /> : <AppIcon name={archived ? "archive" : "notes"} size={48} />}</span>
         <h1 className="min-w-0 flex-1 truncate text-3xl font-semibold">{title}</h1>
         {category && <CategoryDialog category={category} trigger="edit" />}
         <SectionFilterButton label="Note categories" />

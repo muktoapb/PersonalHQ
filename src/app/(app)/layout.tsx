@@ -14,7 +14,7 @@ import { listCategories as financeCategories } from "@/lib/core/finance";
 import { listCategories } from "@/lib/core/notes";
 import { listGroups } from "@/lib/core/tasks";
 import { listTrackerNames } from "@/lib/core/trackers";
-import { todaySnapshot } from "@/lib/core/today";
+import { notices, todaySnapshot } from "@/lib/core/today";
 import { walletOptions } from "@/lib/core/wallets";
 import { today as todayStr } from "@/lib/dates";
 import { formatMoney } from "@/lib/money";
@@ -24,13 +24,14 @@ import { financePages, SETTINGS_PAGES } from "@/lib/nav";
 export default async function AppLayout({ children }: { children: React.ReactNode }) {
   const s = await requireSession();
   const today = todayStr();
-  const [groups, categories, trackerList, walletList, day, expenseCats] = await Promise.all([
+  const [groups, categories, trackerList, walletList, day, expenseCats, alerts] = await Promise.all([
     listGroups(),
     listCategories(),
     listTrackerNames(),
     walletOptions(),
     todaySnapshot(today),
     financeCategories("expense"),
+    notices(today),
   ]);
   const plural = (n: number, w: string) => `${n} ${w}${n === 1 ? "" : "s"}`;
   const reminderTime = day.nextReminder?.at
@@ -137,6 +138,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
               items={items}
               name={spaceTitle(s)}
               theme={theme === "light" || theme === "dark" ? theme : undefined}
+              notices={{ data: alerts, locale: s.locale, seenAt: s.noticesSeenAt }}
             />
             {/* Positioned wrapper for a page's <StatsBar>: main (the scroller) is not
                 positioned, so the bar pins to the board edge instead of scrolling. */}

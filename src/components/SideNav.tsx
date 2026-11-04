@@ -1,15 +1,15 @@
 "use client";
 
-import { CaretLeft, SignOut, X } from "@phosphor-icons/react/ssr";
+import { CaretLeft, X } from "@phosphor-icons/react/ssr";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { type CSSProperties, useEffect, useRef } from "react";
-import { logoutAction } from "@/lib/actions/auth";
-import { SECTION_MENU_EVENT, useScrolledPast } from "./AppShell";
+import { SECTION_MENU_EVENT } from "./AppShell";
 import { AppIcon, type IconName } from "./AppIcon";
 import { Logo } from "./Logo";
 import { MenuList } from "./MenuList";
 import { Notched } from "./Notched";
+import { Notifications } from "./Notifications";
 import { ThemeToggle } from "./ThemeToggle";
 
 // `group` starts a headed group in the panel when it changes.
@@ -32,7 +32,7 @@ export type NavItem = {
   drill?: boolean;
 };
 
-type Props = { items: NavItem[]; name: string; theme?: "light" | "dark" };
+type Props = { items: NavItem[]; name: string; theme?: "light" | "dark"; notices: React.ComponentProps<typeof Notifications> };
 
 // Rail geometry (px): 48px buttons, 6px apart, 6px pill padding, 12px bite padding.
 const railHeight = (n: number) => n * 48 + (n - 1) * 6 + 12 + 24;
@@ -43,14 +43,10 @@ const GAP = 14; // board-coloured gap between the bite and the panel
 // board's edge, and the current section's panel wrapped around the rail (an L
 // shape: cards beside the rail are narrower), with the theme toggle in a tab
 // at the bottom. Phones and portrait tablets: an app-style top bar and bottom tab bar.
-export function SideNav({ items, name, theme }: Props) {
+export function SideNav({ items, name, theme, notices }: Props) {
   const path = usePathname();
   const active = (href: string) => (href === "/" ? path === "/" : path === href || path.startsWith(`${href}/`));
   const section = items.find((it) => active(it.href));
-  // Phones: once the page's big title scrolls away, the top bar shows it.
-  const scrolled = useScrolledPast(56);
-  const subPage = section?.children?.find((c) => c.href === path && c.href !== section.href);
-  const title = subPage?.label ?? section?.label ?? "";
   const back = section?.drill && path !== section.href ? section : null;
   // Phones: sections with a list of their own (task groups, note categories)
   // open it in a bottom sheet from the filter button beside the page title.
@@ -63,38 +59,29 @@ export function SideNav({ items, name, theme }: Props) {
     return () => window.removeEventListener(SECTION_MENU_EVENT, open);
   }, []);
   const notch = { width: BITE_RIGHT + GAP, height: railHeight(items.length) + GAP };
-  const signOut = (
-    <form action={logoutAction}>
-      <button aria-label="Sign out" title="Sign out" className="rounded-full border border-rule bg-surface p-2.5 text-ink-3 transition hover:text-ink">
-        <SignOut size={18} />
-      </button>
-    </form>
-  );
 
   return (
     <>
       {/* phones: app-style top bar (theme and sign out live in Settings), and a
           floating tab bar where the current section expands to show its name.
           Both stay clear of the notch/home bar. */}
+      {/* Scrolls away with the page: no bar or background of its own. */}
       <header
         style={{ viewTransitionName: "app-header" }}
-        className={`sticky top-0 z-30 flex items-center justify-between gap-2 border-b bg-app/85 px-4 pb-2 pt-[calc(0.5rem+env(safe-area-inset-top))] backdrop-blur-xl transition-colors lg:hidden ${scrolled ? "border-rule" : "border-transparent"}`}
+        className="flex items-center justify-between gap-2 px-4 pb-2 pt-[calc(0.5rem+env(safe-area-inset-top))] lg:hidden"
       >
-        <p aria-hidden className={`pointer-events-none absolute bottom-2 ${back ? "left-[3.25rem]" : "left-4"} right-4 flex h-8 items-center truncate text-[17px] font-semibold transition duration-200 ${scrolled ? "opacity-100" : "translate-y-1 opacity-0"}`}>
-          {title}
-        </p>
         {back ? (
-          // Drill-down page: back to the section, labelled with the section
-          // until the page title scrolls away, then with the page title.
-          <Link href={back.href} aria-label={`Back to ${back.label}`} className="relative z-10 flex min-w-0 items-center gap-1.5 font-medium text-accent-text">
+          // Drill-down page: back to the section.
+          <Link href={back.href} aria-label={`Back to ${back.label}`} className="flex min-w-0 items-center gap-1.5 font-medium text-accent-text">
             <span className="grid size-8 shrink-0 place-items-center rounded-full border border-rule bg-surface"><CaretLeft size={16} weight="bold" /></span>
-            <span className={`truncate transition-opacity duration-200 ${scrolled ? "opacity-0" : ""}`}>{back.label}</span>
+            <span className="truncate">{back.label}</span>
           </Link>
         ) : (
-          <Link href="/" className={`flex h-8 min-w-0 items-center gap-2 font-medium transition-opacity duration-200 ${scrolled ? "opacity-0" : ""}`}>
+          <Link href="/" className="flex h-8 min-w-0 items-center gap-2 font-medium">
             <Logo size={28} /> <span className="truncate">{name}</span>
           </Link>
         )}
+        <Notifications {...notices} />
       </header>
       {switcher && (
         <dialog
@@ -231,7 +218,7 @@ export function SideNav({ items, name, theme }: Props) {
 
         <div className="cut-bl flex items-center gap-3 px-4 py-3.5">
           <ThemeToggle initial={theme} />
-          {signOut}
+          <Notifications {...notices} /> {/* sign out lives in Settings › Profile */}
         </div>
       </div>
     </>

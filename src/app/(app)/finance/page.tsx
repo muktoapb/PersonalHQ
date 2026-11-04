@@ -34,16 +34,19 @@ export default async function FinancePage() {
   const kinds = [KIND_META.income, KIND_META.expense, ...(s.manageInvestment ? [KIND_META.investment] : []), ...(s.manageDonation ? [KIND_META.donation] : [])];
 
   return (
-    <div className="mx-auto max-w-5xl space-y-8">
+    <div className="mx-auto max-w-5xl space-y-6">
       <div className="flex flex-wrap items-center justify-between gap-3">
-        <h1 className="text-3xl font-semibold">Finance</h1>
+        <div>
+          <h1 className="text-3xl font-semibold">Finance</h1>
+          <p className="mt-1 text-sm text-ink-3">{r.label}</p>
+        </div>
         <div className="hidden flex-wrap gap-2 md:flex">
           {kinds.map((k) => (
             <Link key={k.slug} href={`/finance/${k.slug}`} className="btn btn-ghost py-1.5 pl-1.5"><AppIcon name={k.icon} size={26} /> Add {k.label.toLowerCase()}</Link>
           ))}
         </div>
       </div>
-      <FinanceSummary period={period} periodLabel={r.label} s={s} />
+      <FinanceSummary period={period} s={s} />
       {/* desktop: balances at a glance (phones get the Wallets row below) */}
       {walletRows.length > 0 && (
         <section className="card hidden lg:block">

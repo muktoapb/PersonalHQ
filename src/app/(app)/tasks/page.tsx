@@ -17,7 +17,7 @@ export default async function AllTasksPage() {
   return (
     <div className="mx-auto max-w-3xl space-y-5">
       <div className="flex items-center gap-3">
-        <AppIcon name="tasks" size={48} />
+        <span className="hidden lg:block"><AppIcon name="tasks" size={48} /></span>
         <div className="min-w-0 flex-1">
           <h1 className="text-3xl font-semibold">All tasks</h1>
           <p className="mt-1 text-sm text-ink-3">

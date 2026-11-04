@@ -5,6 +5,8 @@ import { InstallApp } from "@/components/Pwa";
 import { PaletteChoice, PasswordForm, ProfileForm, SignOutOthers, ThemeChoice } from "@/components/SettingsForms";
 import { isPalette } from "@/lib/palettes";
 import { requireSession } from "@/lib/auth";
+import { logoutAction } from "@/lib/actions/auth";
+import { SignOut } from "@phosphor-icons/react/ssr";
 
 export const metadata = { title: "Profile · Settings" };
 
@@ -59,6 +61,16 @@ export default async function ProfileSettings() {
         <h2 className="font-semibold">Devices</h2>
         <p className="text-sm text-ink-3">Lost a phone or signed in on a shared computer? Sign out everywhere except here.</p>
         <SignOutOthers />
+      </section>
+      {/* desktop: sign out lives here (phones have it on the Settings list) */}
+      <section className="card hidden items-center justify-between gap-3 lg:flex">
+        <div>
+          <h2 className="font-semibold">Sign out</h2>
+          <p className="text-sm text-ink-3">Sign out of PersonalHQ on this computer.</p>
+        </div>
+        <form action={logoutAction}>
+          <button className="btn btn-danger"><SignOut size={16} /> Sign out</button>
+        </form>
       </section>
     </>
   );

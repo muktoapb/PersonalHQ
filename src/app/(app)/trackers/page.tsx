@@ -16,7 +16,7 @@ export default async function TrackersPage() {
   return (
     <div className="mx-auto max-w-6xl space-y-6">
       <div className="flex flex-wrap items-center gap-3">
-        <AppIcon name="trackers" size={48} />
+        <span className="hidden lg:block"><AppIcon name="trackers" size={48} /></span>
         <div className="min-w-0 flex-1">
           <h1 className="text-3xl font-semibold">Trackers</h1>
           <p className="mt-1 hidden text-sm text-ink-3 sm:block">Habits, amounts and readings — set targets to make them goals.</p>

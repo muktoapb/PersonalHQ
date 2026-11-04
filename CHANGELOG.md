@@ -6,15 +6,18 @@ All notable changes to PersonalHQ. Versions follow [Semantic Versioning](https:/
 
 ### Added
 - **Sign-in for MCP apps (OAuth 2.1)** — Claude's custom connectors and other OAuth clients can connect with just the URL: they register themselves, you approve them with your password, and they get short-lived, rotating tokens. Connected apps are listed in Settings › MCP with a Disconnect button; a password reset disconnects them all.
-
-- **App lock** — set a 4–6 digit PIN in Settings › Profile (confirmed with your password). After 1, 5, 15 or 60 minutes without use the app asks for it; "Lock now" locks at once. Wrong PINs count toward the sign-in lockout; forgot it? Sign in with your password.
+- **App lock** — set a 4-digit PIN in Settings › Profile (confirmed with your password); the lock screen unlocks as soon as you type the 4th digit. After 1, 5, 15 or 60 minutes without use the app asks for it; "Lock now" locks at once. Wrong PINs count toward the sign-in lockout; forgot it? Sign in with your password.
 - **Hide wallet balances** — balances show as `****` by default on Finance and Wallets pages; the eye button reveals them until you leave the page.
+- **Notifications** — a bell (phone top bar; desktop bottom-left, where sign-out was) lists overdue tasks, tasks due today, reminders that went off and reminders coming up. The badge counts unread; opening the list marks it read on every device.
+
+### Changed
+- Phones: the top bar scrolls away with the page, page titles have no icon, and the system bars match the app's background (light/dark and colour theme).
+- Desktop: sign out moved to Settings › Profile.
+- Finance: the period sits under the title.
+- Analytics: "Last 3 months" and "Last 6 months" are rolling windows (4 Aug – 4 Nov), not calendar months.
 
 ### Fixed
 - MCP requests from hosted agents that send an `Origin` header (e.g. Muse) were refused with 403; the bearer token is now the only check.
-
-### Changed
-- Analytics: "Last 3 months" and "Last 6 months" are rolling windows (4 Aug – 4 Nov), not calendar months.
 
 ### Removed
 - The copy-and-paste agent prompt in Settings › MCP; agents can't add MCP servers from a chat. Use the Claude Code command or the JSON config instead.
