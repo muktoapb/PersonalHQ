@@ -48,6 +48,37 @@ export const loginAttempts = sqliteTable("login_attempts", {
   updatedAt: integer("updated_at").notNull().default(0), // epoch ms
 });
 
+// AI apps connected over OAuth (MCP). Clients register themselves; nothing
+// gets access until the owner approves with their password. Only hashes of
+// secrets, codes and tokens are stored.
+export const oauthClients = sqliteTable("oauth_clients", {
+  id: id(), // the client_id
+  name: text("name").notNull(),
+  redirectUris: text("redirect_uris", { mode: "json" }).$type<string[]>().notNull(),
+  secretHash: text("secret_hash"), // null: a public client (PKCE only)
+  approvedAt: text("approved_at"), // first approval; never-approved clients are pruned
+  createdAt: createdAt(),
+});
+
+export const oauthCodes = sqliteTable("oauth_codes", {
+  hash: text("hash").primaryKey(),
+  clientId: text("client_id").notNull(),
+  redirectUri: text("redirect_uri").notNull(),
+  challenge: text("challenge").notNull(), // PKCE S256
+  expiresAt: integer("expires_at").notNull(), // epoch ms
+});
+
+export const oauthTokens = sqliteTable("oauth_tokens", {
+  id: id(),
+  clientId: text("client_id").notNull(),
+  accessHash: text("access_hash").notNull().unique(),
+  accessExpiresAt: integer("access_expires_at").notNull(), // epoch ms
+  refreshHash: text("refresh_hash").notNull().unique(),
+  refreshExpiresAt: integer("refresh_expires_at").notNull(),
+  lastUsedAt: integer("last_used_at"),
+  createdAt: createdAt(),
+});
+
 export const TRANSACTION_KINDS = ["income", "expense", "investment", "donation"] as const;
 export type TransactionKind = (typeof TRANSACTION_KINDS)[number];
 

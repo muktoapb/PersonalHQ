@@ -1,7 +1,6 @@
 import { headers } from "next/headers";
 import { McpAccess } from "@/components/SettingsForms";
 import { requireSession } from "@/lib/auth";
-import { promptPrefs } from "@/lib/mcp/prompt";
 import { TOOL_AREAS } from "@/lib/mcp/server";
 
 export const metadata = { title: "MCP · Settings" };
@@ -19,7 +18,7 @@ export default async function McpSettings() {
           <h2 className="font-semibold">AI assistant access</h2>
           <p className="text-sm text-ink-2">Let Claude and other MCP clients read and update your dashboard with a private access token.</p>
         </div>
-        <McpAccess endpoint={`${proto}://${host}/api/mcp`} hasToken={!!s.mcpTokenHash} prefs={promptPrefs(s)} />
+        <McpAccess endpoint={`${proto}://${host}/api/mcp`} hasToken={!!s.mcpTokenHash} />
       </section>
       <section className="card space-y-3">
         <h2 className="font-semibold">Tools <span className="font-normal text-ink-3">· {Object.values(TOOL_AREAS).flat().length}</span></h2>

@@ -11,21 +11,10 @@ const unauthorized = () =>
     { status: 401, headers: { "WWW-Authenticate": 'Bearer realm="personalhq"' } },
   );
 
-// Browsers send Origin; only this site may call (guards DNS rebinding).
-// Desktop/CLI clients send none.
-function badOrigin(req: Request) {
-  const origin = req.headers.get("origin");
-  if (!origin) return false;
-  const host = req.headers.get("x-forwarded-host") ?? req.headers.get("host");
-  try {
-    return new URL(origin).host !== host;
-  } catch {
-    return true;
-  }
-}
-
+// No Origin check: hosted agents (Muse, web clients) send their own Origin,
+// and every request needs the bearer token, which a web page can't know, so
+// the token is what keeps other sites out (DNS rebinding included).
 export async function POST(req: Request) {
-  if (badOrigin(req)) return new Response("Forbidden origin", { status: 403 });
   if (!(await verifyMcpToken(req.headers.get("authorization")))) return unauthorized();
 
   let body: unknown;

@@ -2,6 +2,14 @@
 
 All notable changes to PersonalHQ. Versions follow [Semantic Versioning](https://semver.org); while it's 0.x, minor versions may include breaking changes.
 
+## [Unreleased]
+
+### Changed
+- Analytics: "Last 3 months" and "Last 6 months" are rolling windows (4 Aug – 4 Nov), not calendar months.
+
+### Removed
+- The copy-and-paste agent prompt in Settings › MCP; agents can't add MCP servers from a chat. Use the Claude Code command or the JSON config instead.
+
 ## [0.1.0] — 2026-11-04
 
 First public beta.

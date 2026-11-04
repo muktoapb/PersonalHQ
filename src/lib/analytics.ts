@@ -5,8 +5,8 @@
 export const RANGE_PRESETS = [
   { key: "month", label: "This month" },
   { key: "last-month", label: "Last month" },
-  { key: "3m", label: "3 months" },
-  { key: "6m", label: "6 months" },
+  { key: "3m", label: "Last 3 months" },
+  { key: "6m", label: "Last 6 months" },
   { key: "year", label: "This year" },
   { key: "custom", label: "Custom" },
 ] as const;
@@ -41,6 +41,12 @@ const monthEnd = (s: string, back = 0) => {
   const d = parse(s);
   return ymd(new Date(d.getFullYear(), d.getMonth() - back + 1, 0, 12));
 };
+// The same day n months earlier, kept inside shorter months (31 May -> 28 Feb).
+const monthsBack = (s: string, n: number) => {
+  const d = parse(s);
+  const last = new Date(d.getFullYear(), d.getMonth() - n + 1, 0, 12).getDate();
+  return ymd(new Date(d.getFullYear(), d.getMonth() - n, Math.min(d.getDate(), last), 12));
+};
 const daysBetween = (a: string, b: string) => Math.round((parse(b).getTime() - parse(a).getTime()) / 86_400_000) + 1;
 const isDate = (s?: string) => !!s && /^\d{4}-\d{2}-\d{2}$/.test(s) && ymd(parse(s)) === s;
 
@@ -58,11 +64,14 @@ export function analyticsRange(params: { range?: string; from?: string; to?: str
       p = { from: monthStart(today, 1), to: monthEnd(today, 1) };
       prev = { from: monthStart(today, 2), to: monthEnd(today, 2) };
       break;
+    // Rolling: the same day n months ago up to today (4 Aug – 4 Nov), and
+    // the n months before that.
     case "3m":
     case "6m": {
       const n = key === "3m" ? 3 : 6;
-      p = { from: monthStart(today, n - 1), to: today };
-      prev = { from: monthStart(today, 2 * n - 1), to: monthEnd(today, n) };
+      p = { from: monthsBack(today, n), to: today };
+      const prevTo = addDays(p.from, -1);
+      prev = { from: monthsBack(prevTo, n), to: prevTo };
       break;
     }
     case "year": {

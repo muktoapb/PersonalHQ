@@ -10,7 +10,6 @@ import { deleteLabelAction, updateLabelAction } from "@/lib/actions/tasks";
 import { setPaletteAction, setThemeAction } from "@/lib/actions/theme";
 import { PALETTES, type PaletteKey } from "@/lib/palettes";
 import { GROUP_COLORS } from "@/lib/group-icons";
-import { agentPrompt, type PromptPrefs } from "@/lib/mcp/prompt";
 import { MoneyFields } from "./MoneyFields";
 
 // Forms for the settings pages. Each saves only its own fields.
@@ -364,9 +363,8 @@ function CopyBlock({ label, value }: { label: string; value: string }) {
 
 // Create, replace or revoke the access token. A new token is shown once,
 // filled into the setup snippets; afterwards they show a placeholder.
-export function McpAccess({ endpoint, hasToken, prefs }: { endpoint: string; hasToken: boolean; prefs: PromptPrefs }) {
+export function McpAccess({ endpoint, hasToken }: { endpoint: string; hasToken: boolean }) {
   const [token, setToken] = useState<string>();
-  const [copied, setCopied] = useState(false);
   const [confirming, setConfirming] = useState<"create" | "replace" | "revoke" | null>(null);
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string>();
@@ -379,8 +377,6 @@ export function McpAccess({ endpoint, hasToken, prefs }: { endpoint: string; has
     });
   const revoke = () => start(async () => { await revokeMcpTokenAction(); setToken(undefined); setConfirming(null); });
   const shown = token ?? "YOUR_TOKEN";
-  const prompt = agentPrompt(prefs, endpoint, shown);
-  const copyPrompt = () => navigator.clipboard?.writeText(prompt).then(() => { setCopied(true); setTimeout(() => setCopied(false), 2000); });
   const json = JSON.stringify({ mcpServers: { personalhq: { type: "http", url: endpoint, headers: { Authorization: `Bearer ${shown}` } } } }, null, 2);
 
   return (
@@ -427,19 +423,6 @@ export function McpAccess({ endpoint, hasToken, prefs }: { endpoint: string; has
 
       <div className="space-y-3 border-t border-rule pt-5">
         <h3 className="text-sm font-semibold">Connect</h3>
-        <div className="space-y-3 rounded-2xl border border-rule p-3">
-          <div>
-            <p className="text-sm font-medium">Agent prompt</p>
-            <p className="text-xs text-ink-3">
-              Paste it into a chat with Claude Code or another agent and it connects itself.
-              {token ? " Your new token is filled in." : " Create a new token first to have it filled in, or replace YOUR_TOKEN."}
-            </p>
-          </div>
-          <pre className="max-h-56 overflow-y-auto whitespace-pre-wrap break-all rounded-xl bg-surface-2 p-3 text-xs leading-relaxed text-ink-2">{prompt}</pre>
-          <button type="button" onClick={copyPrompt} className="btn btn-primary">
-            {copied ? <Check size={16} weight="bold" /> : <Copy size={16} />} {copied ? "Copied" : "Copy prompt"}
-          </button>
-        </div>
         <CopyBlock label="Endpoint (Streamable HTTP)" value={endpoint} />
         <CopyBlock label="Claude Code" value={`claude mcp add --transport http personalhq ${endpoint} \\\n  --header "Authorization: Bearer ${shown}"`} />
         <CopyBlock label="Other clients (.mcp.json style)" value={json} />
