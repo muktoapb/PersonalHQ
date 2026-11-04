@@ -1,0 +1,687 @@
+@import "tailwindcss";
+
+/* Soft lavender: white rounded cards on a lavender frame, a violet hero,
+   deep-indigo actions and a few pastel accent cards. Dark follows the OS
+   unless the user picks one with the theme toggle (<html data-theme>). */
+:root {
+  --bg: #dcdcfa;
+  /* page background on phones (desktop shows the frame and board instead) */
+  --app: #f3f3fb;
+  /* logo colours (components/Logo.tsx): a light tile in the theme colour,
+     a deep block and an accent square */
+  --logo-tile-a: oklch(0.96 0.03 285);
+  --logo-tile-b: oklch(0.88 0.07 285);
+  --logo-bowl: oklch(0.36 0.17 283);
+  --logo-mark-a: oklch(0.74 0.14 285);
+  --logo-mark-b: oklch(0.52 0.23 283);
+  --logo-edge: rgb(255 255 255 / 0);
+  --card-shadow: 0 1px 2px rgb(30 27 58 / 0.04), 0 6px 18px -8px rgb(30 27 58 / 0.12);
+  --frame: #eceefe;
+  --board: #f9f9ff;
+  --surface: #ffffff;
+  --surface-2: #eef0fd;
+  --rule: #d9dbf6;
+  --ink: #1e1b3a;
+  --ink-2: #48456a;
+  --ink-3: #7a7897;
+  --accent: #7262ea;
+  --accent-strong: #3f2e9c;
+  --accent-text: #3f2e9c;
+  --accent-soft: #e7e5fd;
+  --accent-ink: #ffffff;
+  --sky: #c4e8fb;
+  --lemon: #fbf7b8;
+  --peach: #f9dcc2;
+  /* Text on an ink-coloured chip (tooltips); glass needs it solid. */
+  --ink-inverse: var(--board);
+  --pastel-ink: #1e1b3a;
+  --income: #13804f;
+  --expense: #d8345a;
+  --investment: #2563eb;
+  --donation: #7c3aed;
+  --danger: #d92d20;
+  /* Chart series, in this fixed order: income, expenses, investments,
+     donations. Checked as a set (lightness band, colour-blind separation,
+     3:1 against the card surface) in light and dark. */
+  --chart-income: #16a06f;
+  --chart-expense: #e5602b;
+  --chart-investment: #2a78d6;
+  --chart-donation: #c94a96;
+  /* Note card colours (Google Keep-like). */
+  --note-coral: #faafa8; --note-peach: #f39f76; --note-sand: #fff8b8; --note-mint: #e2f6d3; --note-sage: #b4ddd3;
+  --note-fog: #d4e4ed; --note-storm: #aeccdc; --note-dusk: #d3bfdb; --note-blossom: #f6e2dd; --note-clay: #e9e3d4;
+  color-scheme: light;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0d0c1a;
+    --app: #13122a;
+    --card-shadow: none;
+    --frame: #0e0d1f;
+    --board: #1b1a35;
+    --surface: #22213f;
+    --surface-2: #26244a;
+    --rule: #34325c;
+    --ink: #eeedff;
+    --ink-2: #c6c4e8;
+    --ink-3: #9290b8;
+    --accent: #6a5ae0;
+    --accent-strong: #5b4ae0;
+    --accent-text: #b8aeff;
+    --accent-soft: #2e2b5c;
+    --accent-ink: #ffffff;
+    --sky: #1c3c55;
+    --lemon: #45421c;
+    --peach: #4f3524;
+    --pastel-ink: #f3f2ff;
+    --income: #4ade80;
+    --expense: #ff7a93;
+    --investment: #7cb4ff;
+    --donation: #b794ff;
+    --danger: #ff6b5e;
+    --chart-income: #22a873;
+    --chart-expense: #e86a35;
+    --chart-investment: #4a8be6;
+    --chart-donation: #d45ea7;
+    --note-coral: #77172e; --note-peach: #692b17; --note-sand: #7c4a03; --note-mint: #264d3b; --note-sage: #0c625d;
+    --note-fog: #256377; --note-storm: #284255; --note-dusk: #472e5b; --note-blossom: #6c394f; --note-clay: #4b443a;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #0d0c1a;
+  --app: #13122a;
+  --card-shadow: none;
+  --frame: #0e0d1f;
+    --board: #1b1a35;
+  --surface: #22213f;
+  --surface-2: #26244a;
+  --rule: #34325c;
+  --ink: #eeedff;
+  --ink-2: #c6c4e8;
+  --ink-3: #9290b8;
+  --accent: #6a5ae0;
+  --accent-strong: #5b4ae0;
+    --accent-text: #b8aeff;
+  --accent-soft: #2e2b5c;
+  --accent-ink: #ffffff;
+  --sky: #1c3c55;
+  --lemon: #45421c;
+  --peach: #4f3524;
+  --pastel-ink: #f3f2ff;
+  --income: #4ade80;
+  --expense: #ff7a93;
+  --investment: #7cb4ff;
+  --donation: #b794ff;
+  --danger: #ff6b5e;
+  --chart-income: #22a873;
+  --chart-expense: #e86a35;
+  --chart-investment: #4a8be6;
+  --chart-donation: #d45ea7;
+  --note-coral: #77172e; --note-peach: #692b17; --note-sand: #7c4a03; --note-mint: #264d3b; --note-sage: #0c625d;
+  --note-fog: #256377; --note-storm: #284255; --note-dusk: #472e5b; --note-blossom: #6c394f; --note-clay: #4b443a;
+  color-scheme: dark;
+}
+
+/* ---------- colour themes (<html data-palette>) ----------
+   Lavender is the default above. The other themes keep lavender's lightness
+   and chroma for every token (converted to OKLCH) and only change the hue
+   (--h); --k / --ka scale the tint of surfaces / accents (Graphite is almost
+   neutral). Chart and money colours stay fixed: they're checked as a set. */
+:root[data-palette="ocean"] { --h: 245; }
+:root[data-palette="teal"] { --h: 195; }
+:root[data-palette="forest"] { --h: 150; --ka: 0.85; }
+:root[data-palette="sunset"] { --h: 45; }
+:root[data-palette="rose"] { --h: 5; }
+:root[data-palette="graphite"] { --h: 265; --k: 0.18; --ka: 0.12; }
+
+:root[data-palette]:not([data-palette="glass"]) {
+  --k: 1;
+  --ka: 1;
+  --logo-tile-a: oklch(0.96 calc(0.03 * var(--ka)) var(--h));
+  --logo-tile-b: oklch(0.88 calc(0.07 * var(--ka)) var(--h));
+  --logo-bowl: oklch(0.36 calc(0.17 * var(--ka)) var(--h));
+  --logo-mark-a: oklch(0.74 calc(0.14 * var(--ka)) var(--h));
+  --logo-mark-b: oklch(0.52 calc(0.23 * var(--ka)) var(--h));
+  --bg: oklch(0.904 calc(0.041 * var(--k)) var(--h));
+  --app: oklch(0.966 calc(0.011 * var(--k)) var(--h));
+  --frame: oklch(0.952 calc(0.022 * var(--k)) var(--h));
+  --board: oklch(0.984 calc(0.008 * var(--k)) var(--h));
+  --surface-2: oklch(0.957 calc(0.018 * var(--k)) var(--h));
+  --rule: oklch(0.898 calc(0.037 * var(--k)) var(--h));
+  --ink: oklch(0.243 calc(0.058 * var(--k)) var(--h));
+  --ink-2: oklch(0.41 calc(0.061 * var(--k)) var(--h));
+  --ink-3: oklch(0.586 calc(0.047 * var(--k)) var(--h));
+  --accent-soft: oklch(0.931 calc(0.032 * var(--k)) var(--h));
+  --accent: oklch(0.584 calc(0.198 * var(--ka)) var(--h));
+  --accent-strong: oklch(0.395 calc(0.169 * var(--ka)) var(--h));
+  --accent-text: oklch(0.395 calc(0.169 * var(--ka)) var(--h));
+}
+@media (prefers-color-scheme: dark) {
+  :root[data-palette]:not([data-palette="glass"]):not([data-theme="light"]) {
+    --bg: oklch(0.164 calc(0.029 * var(--k)) var(--h));
+    --app: oklch(0.198 calc(0.047 * var(--k)) var(--h));
+    --frame: oklch(0.171 calc(0.037 * var(--k)) var(--h));
+    --board: oklch(0.234 calc(0.051 * var(--k)) var(--h));
+    --surface: oklch(0.265 calc(0.055 * var(--k)) var(--h));
+    --surface-2: oklch(0.284 calc(0.068 * var(--k)) var(--h));
+    --rule: oklch(0.341 calc(0.072 * var(--k)) var(--h));
+    --ink: oklch(0.952 calc(0.024 * var(--k)) var(--h));
+    --ink-2: oklch(0.834 calc(0.05 * var(--k)) var(--h));
+    --ink-3: oklch(0.669 calc(0.059 * var(--k)) var(--h));
+    --accent-soft: oklch(0.32 calc(0.085 * var(--k)) var(--h));
+    --accent: oklch(0.557 calc(0.196 * var(--ka)) var(--h));
+    --accent-strong: oklch(0.521 calc(0.217 * var(--ka)) var(--h));
+    --accent-text: oklch(0.789 calc(0.114 * var(--ka)) var(--h));
+  }
+}
+:root[data-palette]:not([data-palette="glass"])[data-theme="dark"] {
+  --bg: oklch(0.164 calc(0.029 * var(--k)) var(--h));
+  --app: oklch(0.198 calc(0.047 * var(--k)) var(--h));
+  --frame: oklch(0.171 calc(0.037 * var(--k)) var(--h));
+  --board: oklch(0.234 calc(0.051 * var(--k)) var(--h));
+  --surface: oklch(0.265 calc(0.055 * var(--k)) var(--h));
+  --surface-2: oklch(0.284 calc(0.068 * var(--k)) var(--h));
+  --rule: oklch(0.341 calc(0.072 * var(--k)) var(--h));
+  --ink: oklch(0.952 calc(0.024 * var(--k)) var(--h));
+  --ink-2: oklch(0.834 calc(0.05 * var(--k)) var(--h));
+  --ink-3: oklch(0.669 calc(0.059 * var(--k)) var(--h));
+  --accent-soft: oklch(0.32 calc(0.085 * var(--k)) var(--h));
+  --accent: oklch(0.557 calc(0.196 * var(--ka)) var(--h));
+  --accent-strong: oklch(0.521 calc(0.217 * var(--ka)) var(--h));
+  --accent-text: oklch(0.789 calc(0.114 * var(--ka)) var(--h));
+}
+/* the per-theme --k / --ka above must win over the defaults of 1 */
+:root[data-palette="forest"]:not([data-palette="glass"]) { --ka: 0.85; }
+:root[data-palette="graphite"]:not([data-palette="glass"]) { --k: 0.18; --ka: 0.12; }
+
+/* ---------- Liquid Glass ----------
+   Frosted, translucent panels floating over a soft colour wallpaper: every
+   surface blurs what's behind it. */
+:root[data-palette="glass"] {
+  --wallpaper:
+    radial-gradient(55% 45% at 8% 8%, #a9c7ff 0%, transparent 62%),
+    radial-gradient(45% 40% at 92% 12%, #f6b8e4 0%, transparent 62%),
+    radial-gradient(50% 45% at 85% 92%, #9ee6d6 0%, transparent 62%),
+    radial-gradient(50% 45% at 12% 88%, #ffd8a3 0%, transparent 62%),
+    #eef1fb;
+  --bg: transparent;
+  --frame: rgb(255 255 255 / 0.06);
+  --board: rgb(255 255 255 / 0.55);
+  --app: rgb(255 255 255 / 0.25);
+  --surface: rgb(255 255 255 / 0.62);
+  --surface-2: rgb(206 216 248 / 0.45);
+  --rule: rgb(255 255 255 / 0.7);
+  --ink: oklch(0.22 0.03 262);
+  --ink-2: oklch(0.38 0.03 262);
+  --ink-3: oklch(0.5 0.035 262);
+  --accent: oklch(0.6 0.19 258);
+  --accent-strong: oklch(0.5 0.21 262);
+  --accent-text: oklch(0.44 0.19 262);
+  --accent-soft: rgb(255 255 255 / 0.55);
+  --ink-inverse: #ffffff;
+  --logo-tile-a: rgb(255 255 255 / 0.85);
+  --logo-tile-b: rgb(214 228 255 / 0.75);
+  --logo-bowl: #071d55;
+  --logo-mark-a: #12a5f5;
+  --logo-mark-b: #0750f5;
+  --logo-edge: rgb(255 255 255 / 0.55);
+  --glass-shadow: 0 10px 34px -12px rgb(30 40 90 / 0.28);
+  --card-shadow: var(--glass-shadow);
+}
+@media (prefers-color-scheme: dark) {
+  :root[data-palette="glass"]:not([data-theme="light"]) {
+    --wallpaper:
+      radial-gradient(55% 45% at 8% 8%, #2b3f94 0%, transparent 62%),
+      radial-gradient(45% 40% at 92% 12%, #6d2a72 0%, transparent 62%),
+      radial-gradient(50% 45% at 85% 92%, #155e55 0%, transparent 62%),
+      radial-gradient(50% 45% at 12% 88%, #6b451c 0%, transparent 62%),
+      #0b0d1a;
+    --frame: rgb(8 10 24 / 0.42);
+    --board: rgb(255 255 255 / 0.06);
+    --app: rgb(20 22 40 / 0.35);
+    --surface: rgb(36 38 64 / 0.5);
+    --surface-2: rgb(255 255 255 / 0.08);
+    --rule: rgb(255 255 255 / 0.14);
+    --ink: oklch(0.96 0.01 262);
+    --ink-2: oklch(0.84 0.02 262);
+    --ink-3: oklch(0.7 0.03 262);
+    --accent: oklch(0.62 0.19 258);
+    --accent-strong: oklch(0.56 0.2 262);
+    --accent-text: oklch(0.82 0.1 258);
+    --accent-soft: rgb(255 255 255 / 0.12);
+    --ink-inverse: #0b0d1a;
+    --glass-shadow: 0 10px 34px -12px rgb(0 0 0 / 0.6);
+  }
+}
+:root[data-palette="glass"][data-theme="dark"] {
+  --wallpaper:
+    radial-gradient(55% 45% at 8% 8%, #2b3f94 0%, transparent 62%),
+    radial-gradient(45% 40% at 92% 12%, #6d2a72 0%, transparent 62%),
+    radial-gradient(50% 45% at 85% 92%, #155e55 0%, transparent 62%),
+    radial-gradient(50% 45% at 12% 88%, #6b451c 0%, transparent 62%),
+    #0b0d1a;
+  --frame: rgb(8 10 24 / 0.42);
+  --board: rgb(255 255 255 / 0.06);
+  --app: rgb(20 22 40 / 0.35);
+  --surface: rgb(36 38 64 / 0.5);
+  --surface-2: rgb(255 255 255 / 0.08);
+  --rule: rgb(255 255 255 / 0.14);
+  --ink: oklch(0.96 0.01 262);
+  --ink-2: oklch(0.84 0.02 262);
+  --ink-3: oklch(0.7 0.03 262);
+  --accent: oklch(0.62 0.19 258);
+  --accent-strong: oklch(0.56 0.2 262);
+  --accent-text: oklch(0.82 0.1 258);
+  --accent-soft: rgb(255 255 255 / 0.12);
+  --ink-inverse: #0b0d1a;
+  --glass-shadow: 0 10px 34px -12px rgb(0 0 0 / 0.6);
+}
+:root[data-palette="glass"],
+:root[data-palette="glass"] body {
+  background: var(--wallpaper);
+  background-attachment: fixed;
+}
+/* Desktop shapes in glass: the frame, the board and every cut-out paint the
+   same screen-fixed wallpaper under their own tint, so a cut-out shows exactly
+   the frame behind it (a real "hole" in the glass board) and the L-shaped menu
+   panel keeps its notch. Inner corners are carved with masks, not colour. */
+:root[data-palette="glass"] {
+  --frame-paint: linear-gradient(var(--frame), var(--frame)), var(--wallpaper);
+  --board-paint: linear-gradient(var(--board), var(--board)), linear-gradient(var(--frame), var(--frame)), var(--wallpaper);
+}
+@media (min-width: 1024px) {
+  :root[data-palette="glass"] .lg\:bg-frame { background: var(--frame-paint); background-attachment: fixed; }
+  :root[data-palette="glass"] .lg\:bg-board {
+    background: var(--board-paint);
+    background-attachment: fixed;
+    box-shadow: var(--glass-shadow);
+  }
+  :root[data-palette="glass"] :is(.cut-tl, .cut-bl, .cut-l, .cut-b),
+  :root[data-palette="glass"] :is(.cut-tl, .cut-bl, .cut-l, .cut-b)::before,
+  :root[data-palette="glass"] :is(.cut-tl, .cut-bl, .cut-l, .cut-b)::after {
+    background: var(--cut-paint, var(--frame-paint));
+    background-attachment: fixed;
+  }
+  :root[data-palette="glass"] .cut-tl::before,
+  :root[data-palette="glass"] .cut-tl::after { -webkit-mask: radial-gradient(circle at 100% 100%, transparent calc(var(--r) - 0.5px), #000 var(--r)); mask: radial-gradient(circle at 100% 100%, transparent calc(var(--r) - 0.5px), #000 var(--r)); }
+  :root[data-palette="glass"] .cut-bl::before,
+  :root[data-palette="glass"] .cut-bl::after,
+  :root[data-palette="glass"] .cut-l::before,
+  :root[data-palette="glass"] .cut-b::after { -webkit-mask: radial-gradient(circle at 100% 0, transparent calc(var(--r) - 0.5px), #000 var(--r)); mask: radial-gradient(circle at 100% 0, transparent calc(var(--r) - 0.5px), #000 var(--r)); }
+  :root[data-palette="glass"] .cut-l::after { -webkit-mask: radial-gradient(circle at 100% 100%, transparent calc(var(--r) - 0.5px), #000 var(--r)); mask: radial-gradient(circle at 100% 100%, transparent calc(var(--r) - 0.5px), #000 var(--r)); }
+  :root[data-palette="glass"] .cut-b::before { -webkit-mask: radial-gradient(circle at 0 0, transparent calc(var(--r) - 0.5px), #000 var(--r)); mask: radial-gradient(circle at 0 0, transparent calc(var(--r) - 0.5px), #000 var(--r)); }
+  /* the menu panel stays glass on the board */
+  :root[data-palette="glass"] .sticky-heading { background: var(--surface); -webkit-backdrop-filter: blur(16px); backdrop-filter: blur(16px); }
+}
+/* Frosted surfaces: blur + saturate what's behind. */
+:root[data-palette="glass"] :is(.card, .notch-body, .seg, .input, dialog, .cut-b > dl, [class*="bg-surface"], [class*="bg-app"]) {
+  -webkit-backdrop-filter: blur(22px) saturate(180%);
+  backdrop-filter: blur(22px) saturate(180%);
+}
+:root[data-palette="glass"] :is(.card, dialog, .cut-b > dl) {
+  box-shadow: var(--glass-shadow);
+}
+:root[data-palette="glass"] .cut-b > dl { background: var(--surface); }
+:root[data-palette="glass"] dialog::backdrop { -webkit-backdrop-filter: blur(6px); backdrop-filter: blur(6px); }
+/* The hero turns into tinted glass. */
+:root[data-palette="glass"] .hero {
+  background-color: color-mix(in oklab, var(--accent) 78%, transparent);
+  -webkit-backdrop-filter: blur(22px) saturate(180%);
+  backdrop-filter: blur(22px) saturate(180%);
+  box-shadow: var(--glass-shadow);
+}
+
+@theme inline {
+  --font-sans: var(--font-lexend), ui-sans-serif, system-ui, sans-serif;
+  --color-bg: var(--bg);
+  --color-app: var(--app);
+  --color-frame: var(--frame);
+  --color-board: var(--board);
+  --color-surface: var(--surface);
+  --color-surface-2: var(--surface-2);
+  --color-ink: var(--ink);
+  --color-ink-2: var(--ink-2);
+  --color-ink-3: var(--ink-3);
+  --color-rule: var(--rule);
+  --color-accent: var(--accent);
+  --color-accent-strong: var(--accent-strong);
+  --color-accent-text: var(--accent-text);
+  --color-accent-soft: var(--accent-soft);
+  --color-accent-ink: var(--accent-ink);
+  --color-sky: var(--sky);
+  --color-lemon: var(--lemon);
+  --color-peach: var(--peach);
+  --color-pastel-ink: var(--pastel-ink);
+  --color-ink-inverse: var(--ink-inverse);
+  --color-income: var(--income);
+  --color-expense: var(--expense);
+  --color-investment: var(--investment);
+  --color-donation: var(--donation);
+  --color-danger: var(--danger);
+}
+
+html {
+  background: var(--bg);
+}
+
+body {
+  color: var(--ink);
+  background: var(--bg);
+  font-family: var(--font-sans);
+  /* app feel on phones: no grey tap flash, no rubber-band past the page */
+  -webkit-tap-highlight-color: transparent;
+  overscroll-behavior-y: none;
+}
+
+h1 {
+  letter-spacing: -0.02em;
+}
+
+@layer components {
+  .card { @apply rounded-3xl border border-rule bg-surface p-4 sm:rounded-[28px] sm:p-6; }
+  /* A soft lavender block that groups smaller cards. */
+  .panel { @apply rounded-[28px] bg-surface-2 p-5; }
+  .label { @apply mb-1.5 block text-xs font-medium text-ink-3; }
+  .input {
+    @apply w-full rounded-xl border border-rule bg-surface px-3.5 py-2.5 text-base text-ink sm:text-sm outline-none transition placeholder:text-ink-3 focus:border-accent focus:ring-4 focus:ring-accent/15;
+  }
+  /* use as "btn btn-primary" etc. */
+  .btn {
+    @apply inline-flex items-center justify-center gap-1.5 rounded-xl px-4 py-2.5 text-sm font-medium transition active:scale-[0.97] disabled:opacity-50;
+  }
+  .btn-primary {
+    @apply border border-black/25 bg-accent-strong text-accent-ink shadow-[inset_0_1px_0_rgb(255_255_255/0.15)] hover:brightness-110;
+  }
+  .btn-ghost { @apply border border-accent/45 bg-surface text-accent-text hover:bg-surface-2; }
+  .btn-danger { @apply text-danger hover:bg-danger/10; }
+  /* Segmented control: a row of links/buttons in one bordered box. */
+  .seg { @apply flex items-center gap-0.5 rounded-xl border border-rule bg-surface p-1 text-sm; }
+  /* The violet feature card, with a faint hexagon grid. */
+  .hero {
+    @apply relative overflow-hidden rounded-[28px] bg-accent p-6 text-white sm:p-9;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='56' height='97' viewBox='0 0 56 97'%3E%3Cpath d='M28 0l28 16v32L28 64 0 48V16zM28 64v33' fill='none' stroke='white' stroke-opacity='.07'/%3E%3C/svg%3E");
+    background-position: right top;
+  }
+}
+
+/* Cut-outs (md and up): a tab of frame colour cut into a corner of the board,
+   with inverted rounded corners where it meets the board. Set --cut-bg to cut
+   a panel instead (e.g. --cut-bg: var(--board) to notch a panel on the board). */
+.cut-tl,
+.cut-bl {
+  --r: 24px;
+  position: absolute;
+  left: 0;
+  background: var(--cut-bg, var(--frame));
+}
+.cut-tl::before,
+.cut-tl::after,
+.cut-bl::before,
+.cut-bl::after {
+  content: "";
+  position: absolute;
+  width: var(--r);
+  height: var(--r);
+}
+.cut-tl { top: 0; border-bottom-right-radius: var(--r); }
+.cut-tl::before,
+.cut-tl::after { background: radial-gradient(circle at 100% 100%, transparent calc(var(--r) - 0.5px), var(--cut-bg, var(--frame)) var(--r)); }
+.cut-tl::before { left: 100%; top: 0; }
+.cut-tl::after { top: 100%; left: 0; }
+.cut-bl { bottom: 0; border-top-right-radius: var(--r); }
+.cut-bl::before,
+.cut-bl::after { background: radial-gradient(circle at 100% 0, transparent calc(var(--r) - 0.5px), var(--frame) var(--r)); }
+.cut-bl::before { left: 100%; bottom: 0; }
+.cut-bl::after { bottom: 100%; left: 0; }
+
+/* Side bite: a frame-coloured notch in the board's left edge (holds the nav rail). */
+.cut-l {
+  --r: 24px;
+  position: absolute;
+  left: 0;
+  background: var(--frame);
+  border-top-right-radius: var(--r);
+  border-bottom-right-radius: var(--r);
+}
+.cut-l::before,
+.cut-l::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  width: var(--r);
+  height: var(--r);
+}
+.cut-l::before { bottom: 100%; background: radial-gradient(circle at 100% 0, transparent calc(var(--r) - 0.5px), var(--frame) var(--r)); }
+.cut-l::after { top: 100%; background: radial-gradient(circle at 100% 100%, transparent calc(var(--r) - 0.5px), var(--frame) var(--r)); }
+
+/* Bottom tab: a frame-coloured notch rising from the board's bottom edge. */
+.cut-b {
+  --r: 24px;
+  position: absolute;
+  bottom: 0;
+  background: var(--frame);
+  border-top-left-radius: var(--r);
+  border-top-right-radius: var(--r);
+}
+.cut-b::before,
+.cut-b::after {
+  content: "";
+  position: absolute;
+  bottom: 0;
+  width: var(--r);
+  height: var(--r);
+}
+.cut-b::before { right: 100%; background: radial-gradient(circle at 0 0, transparent calc(var(--r) - 0.5px), var(--frame) var(--r)); }
+.cut-b::after { left: 100%; background: radial-gradient(circle at 100% 0, transparent calc(var(--r) - 0.5px), var(--frame) var(--r)); }
+
+/* Notched card: the top-right corner is scooped out and a badge (icon) sits
+   in the hollow. See components/Notched.tsx. --nc: notch centre inset,
+   --nr: notch radius. */
+.notched { position: relative; --nc: 22px; --nr: 26px; }
+.notched-sm { --nc: 16px; --nr: 19px; }
+.notch-body {
+  border-radius: inherit;
+  -webkit-mask: radial-gradient(circle var(--nr) at calc(100% - var(--nc)) var(--nc), transparent calc(var(--nr) - 0.5px), #000 var(--nr));
+  mask: radial-gradient(circle var(--nr) at calc(100% - var(--nc)) var(--nc), transparent calc(var(--nr) - 0.5px), #000 var(--nr));
+}
+.notch-ring {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  border-radius: inherit;
+  pointer-events: none;
+}
+.notch-ring::after {
+  content: "";
+  position: absolute;
+  width: calc(var(--nr) * 2);
+  height: calc(var(--nr) * 2);
+  top: calc(var(--nc) - var(--nr));
+  right: calc(var(--nc) - var(--nr));
+  border-radius: 50%;
+  border: 1px solid var(--rule);
+}
+.notch-badge {
+  position: absolute;
+  top: var(--nc);
+  right: var(--nc);
+  translate: 50% -50%;
+}
+
+/* Toggle: <input type="checkbox" role="switch" className="switch" /> */
+.switch {
+  appearance: none;
+  position: relative;
+  flex-shrink: 0;
+  width: 42px;
+  height: 26px;
+  border-radius: 999px;
+  background: var(--surface-2);
+  box-shadow: inset 0 0 0 1px var(--rule);
+  cursor: pointer;
+  transition: background 0.2s;
+}
+.switch::after {
+  content: "";
+  position: absolute;
+  top: 3px;
+  left: 3px;
+  width: 20px;
+  height: 20px;
+  border-radius: 999px;
+  background: #fff;
+  box-shadow: 0 1px 3px rgb(0 0 0 / 0.25);
+  transition: transform 0.2s;
+}
+.switch:checked {
+  background: var(--accent-strong);
+  box-shadow: none;
+}
+.switch:checked::after {
+  transform: translateX(16px);
+}
+.switch:focus-visible {
+  outline: 3px solid color-mix(in oklab, var(--accent) 40%, transparent);
+  outline-offset: 2px;
+}
+
+/* ---------- native-app feel on phones (touch screens; desktop untouched) ---------- */
+
+/* Phones and portrait tablets (the app shell): a soft app background with a
+   faint accent glow at the top. */
+@media (max-width: 1023px) {
+  html,
+  body {
+    background-color: var(--app);
+  }
+  body {
+    background-image: radial-gradient(150% 420px at 50% -80px, color-mix(in oklab, var(--accent) 16%, transparent), transparent);
+    background-repeat: no-repeat;
+  }
+  /* light mode: lift white cards off the pale background */
+  .card {
+    box-shadow: var(--card-shadow);
+  }
+}
+
+@media (pointer: coarse) {
+  /* UI chrome isn't text: no long-press callout or selection on controls,
+     no double-tap zoom delay. Content stays selectable. */
+  a, button, label, [role="button"], [role="radio"], nav, header {
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    user-select: none;
+  }
+  a, button, input, select, textarea, label, [role="button"] {
+    touch-action: manipulation;
+  }
+  /* iOS-style press feedback for plain links and buttons (.btn scales instead). */
+  a:not(.btn):active,
+  button:not(.btn):active {
+    opacity: 0.55;
+    transition: opacity 0s;
+  }
+}
+
+/* Page changes: the new page fades up; header and tab bar stay put. */
+@keyframes page-in {
+  from { opacity: 0; translate: 0 10px; }
+}
+@keyframes page-out {
+  to { opacity: 0; }
+}
+::view-transition-old(.page-exit) { animation: 90ms ease-in both page-out; }
+::view-transition-new(.page-enter) { animation: 240ms cubic-bezier(0.2, 0.8, 0.2, 1) both page-in; }
+::view-transition-group(app-header),
+::view-transition-group(app-tabs) { animation: none; z-index: 50; }
+::view-transition-old(app-header),
+::view-transition-old(app-tabs) { display: none; }
+::view-transition-new(app-header),
+::view-transition-new(app-tabs) { animation: none; }
+::view-transition-old(root),
+::view-transition-new(root) { animation: none; }
+@media (min-width: 1024px), (prefers-reduced-motion: reduce) {
+  ::view-transition-old(*),
+  ::view-transition-new(*),
+  ::view-transition-group(*) { animation: none !important; }
+}
+
+/* Bottom sheets (dialog.sheet): slide up with a grab handle; drag down to
+   close (AppShell's SheetGestures). */
+@media (max-width: 639px) {
+  dialog.sheet {
+    transform: translateY(100%);
+    transition: transform 0.32s cubic-bezier(0.2, 0.8, 0.2, 1), overlay 0.32s allow-discrete, display 0.32s allow-discrete;
+  }
+  dialog.sheet[open] { transform: none; }
+  @starting-style {
+    dialog.sheet[open] { transform: translateY(100%); }
+  }
+  dialog.sheet::backdrop {
+    background: rgb(0 0 0 / 0);
+    transition: background-color 0.32s, overlay 0.32s allow-discrete, display 0.32s allow-discrete;
+  }
+  dialog.sheet[open]::backdrop { background: rgb(0 0 0 / 0.4); }
+  @starting-style {
+    dialog.sheet[open]::backdrop { background: rgb(0 0 0 / 0); }
+  }
+  dialog.sheet::before {
+    content: "";
+    display: block;
+    width: 38px;
+    height: 5px;
+    margin: -2px auto 12px;
+    border-radius: 999px;
+    background: var(--rule);
+  }
+  @media (prefers-reduced-motion: reduce) {
+    dialog.sheet, dialog.sheet::backdrop { transition: none; }
+  }
+}
+
+/* ---------- desktop scrolling, app-style (lg+, mouse/trackpad) ----------
+   Scrollbars are thin violet pills that show only while a pane scrolls or the
+   pointer nears its edge ([data-scrolling], set by AppShell's DesktopScroll),
+   and list group headings stick. In the base layer so utilities
+   like [scrollbar-width:none] still win. */
+@layer base {
+  @media (min-width: 1024px) and (pointer: fine) {
+    :root {
+      --scroll-thumb-active: color-mix(in oklab, var(--accent) 60%, transparent);
+    }
+    /* Chrome, Edge, Safari: a short floating pill, inset from the pane's
+       top and bottom so it sits inside the rounded corners. (Setting
+       scrollbar-width/-color would switch these styles off in Chrome, so
+       those are for Firefox only.) */
+    @supports selector(::-webkit-scrollbar) {
+      ::-webkit-scrollbar { width: 10px; height: 10px; }
+      ::-webkit-scrollbar-track, ::-webkit-scrollbar-corner { background: transparent; }
+      ::-webkit-scrollbar-track:vertical { margin-block: 28px; }
+      ::-webkit-scrollbar-track:horizontal { margin-inline: 28px; }
+      ::-webkit-scrollbar-thumb {
+        border: 3px solid transparent;
+        border-radius: 999px;
+        background: transparent padding-box;
+      }
+      [data-scrolling]::-webkit-scrollbar-thumb { background: var(--scroll-thumb-active) padding-box; }
+      [data-scrolling]::-webkit-scrollbar-thumb:hover { background: var(--accent) padding-box; }
+    }
+    /* Firefox */
+    @supports not selector(::-webkit-scrollbar) {
+      * { scrollbar-width: thin; scrollbar-color: transparent transparent; }
+      [data-scrolling] { scrollbar-color: var(--scroll-thumb-active) transparent; }
+    }
+  }
+}
+
+@layer components {
+  /* List group headings ("Overdue", "Pinned"…) stick while their list scrolls (desktop). */
+  .sticky-heading {
+    @apply lg:sticky lg:top-0 lg:z-10 lg:-mx-1 lg:rounded-xl lg:px-2 lg:py-1.5 lg:backdrop-blur-md;
+    @media (min-width: 1024px) {
+      background: color-mix(in oklab, var(--board) 96%, transparent);
+    }
+  }
+}

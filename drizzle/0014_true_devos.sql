@@ -1,0 +1,1 @@
+ALTER TABLE `settings` ADD `space_name` text;

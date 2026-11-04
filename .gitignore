@@ -1,0 +1,45 @@
+# dependencies
+/node_modules
+/.pnp
+.pnp.*
+
+# next.js
+/.next/
+/out/
+next-env.d.ts
+*.tsbuildinfo
+
+# build output / tooling caches
+/build
+/coverage
+.turbo
+.vercel
+
+# your data — the SQLite database and its journals (never commit it)
+/data/*
+!/data/.gitkeep
+*.db
+*.db-journal
+*.db-wal
+*.db-shm
+*.sqlite
+
+# backups downloaded from Settings › Data, recovery keys
+personalhq-backup-*.json
+personalhq-recovery-key*.txt
+
+# env (keep the example)
+.env*
+!.env.example
+
+# editors / OS
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/*
+!.vscode/extensions.json
+
+# logs
+*.log
+npm-debug.log*
+pnpm-debug.log*
