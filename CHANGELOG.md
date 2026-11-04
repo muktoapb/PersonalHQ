@@ -7,6 +7,9 @@ All notable changes to PersonalHQ. Versions follow [Semantic Versioning](https:/
 ### Added
 - **Sign-in for MCP apps (OAuth 2.1)** — Claude's custom connectors and other OAuth clients can connect with just the URL: they register themselves, you approve them with your password, and they get short-lived, rotating tokens. Connected apps are listed in Settings › MCP with a Disconnect button; a password reset disconnects them all.
 
+- **App lock** — set a 4–6 digit PIN in Settings › Profile (confirmed with your password). After 1, 5, 15 or 60 minutes without use the app asks for it; "Lock now" locks at once. Wrong PINs count toward the sign-in lockout; forgot it? Sign in with your password.
+- **Hide wallet balances** — balances show as `****` by default on Finance and Wallets pages; the eye button reveals them until you leave the page.
+
 ### Fixed
 - MCP requests from hosted agents that send an `Origin` header (e.g. Muse) were refused with 403; the bearer token is now the only check.
 

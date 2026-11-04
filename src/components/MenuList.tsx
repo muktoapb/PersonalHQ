@@ -1,8 +1,9 @@
 import { CaretRight, Check } from "@phosphor-icons/react/ssr";
 import Link from "next/link";
 import { AppIcon, type IconName } from "./AppIcon";
+import { Balance } from "./Balance";
 
-export type MenuItem = { href: string; label: string; icon: IconName; hint?: string; value?: string; group?: string; color?: string };
+export type MenuItem = { href: string; label: string; icon: IconName; hint?: string; value?: string; private?: boolean; group?: string; color?: string };
 
 // A native-style grouped list (rows with icon, label, hint and a chevron),
 // used where phones drill into sub-pages (Settings, Finance) and in the
@@ -28,7 +29,7 @@ export function MenuList({ items, current, className = "" }: { items: MenuItem[]
                     <span className="block truncate text-[15px] font-medium">{it.label}</span>
                     {it.hint && <span className="block truncate text-xs text-ink-3">{it.hint}</span>}
                   </span>
-                  {it.value && <span className="shrink-0 text-sm tabular-nums text-ink-2">{it.value}</span>}
+                  {it.value && <span className="shrink-0 text-sm tabular-nums text-ink-2">{it.private ? <Balance>{it.value}</Balance> : it.value}</span>}
                   {current === undefined ? (
                     <CaretRight size={16} weight="bold" className="shrink-0 text-ink-3" />
                   ) : (

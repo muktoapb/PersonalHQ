@@ -31,7 +31,8 @@ export const settings = sqliteTable("settings", {
   // Hash of the one-time-shown recovery key that resets a forgotten password.
   recoveryHash: text("recovery_hash"),
   sessionSecret: text("session_secret").notNull(),
-  pinHash: text("pin_hash"),
+  pinHash: text("pin_hash"), // app lock PIN (scrypt); null = no lock
+  pinLockMinutes: integer("pin_lock_minutes").notNull().default(5), // lock after this long inactive
   manageDonation: integer("manage_donation", { mode: "boolean" }).notNull().default(true),
   manageInvestment: integer("manage_investment", { mode: "boolean" }).notNull().default(true),
   mcpTokenHash: text("mcp_token_hash"),

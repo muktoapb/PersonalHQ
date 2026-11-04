@@ -1,6 +1,8 @@
 import { ArrowRight, Star } from "@phosphor-icons/react/ssr";
 import Link from "next/link";
 import { AppIcon } from "@/components/AppIcon";
+import { Balance } from "@/components/Balance";
+import { BalanceToggle } from "@/components/BalanceToggle";
 import { StatsBar } from "@/components/StatsBar";
 import { DeleteTransfer, TransferDialog, WalletDialog } from "@/components/Wallets";
 import { requireSession } from "@/lib/auth";
@@ -41,15 +43,18 @@ export default async function WalletsPage() {
       {active.length > 0 && (
         <section className="hero flex flex-wrap items-end justify-between gap-4 py-7">
           <div>
-            <p className="text-sm text-white/75">Total balance · {active.length} wallet{active.length === 1 ? "" : "s"}</p>
-            <p className="mt-2 text-4xl font-semibold tracking-tight tabular-nums sm:text-5xl">{fmt(total)}</p>
+            <p className="flex items-center gap-1 text-sm text-white/75">
+              Total balance · {active.length} wallet{active.length === 1 ? "" : "s"}
+              <BalanceToggle className="-my-2 text-white/80 hover:bg-white/15 hover:text-white" />
+            </p>
+            <p className="mt-2 text-4xl font-semibold tracking-tight tabular-nums sm:text-5xl"><Balance>{fmt(total)}</Balance></p>
           </div>
           {/* how the total splits across wallets */}
           {total > 0 && active.length > 1 && (
             <div className="w-full max-w-sm space-y-2">
               <div className="flex h-2.5 gap-[2px] overflow-hidden rounded-full bg-white/15">
                 {active.filter((w) => w.balance > 0).map((w) => (
-                  <div key={w.id} title={`${w.name}: ${fmt(w.balance)}`} className="h-full first:rounded-l-full last:rounded-r-full" style={{ width: `${(w.balance / total) * 100}%`, background: w.color }} />
+                  <div key={w.id} title={`${w.name}: ${Math.round((w.balance / total) * 100)}%`} className="h-full first:rounded-l-full last:rounded-r-full" style={{ width: `${(w.balance / total) * 100}%`, background: w.color }} />
                 ))}
               </div>
               <p className="text-xs text-white/75">{active.filter((w) => w.balance > 0).map((w) => `${w.name} ${Math.round((w.balance / total) * 100)}%`).join(" · ")}</p>
@@ -84,7 +89,7 @@ export default async function WalletsPage() {
                 </div>
                 <ArrowRight size={16} className="text-ink-3 transition group-hover:translate-x-0.5 group-hover:text-accent-text" />
               </div>
-              <p className={`text-2xl font-medium tracking-tight tabular-nums ${w.balance < 0 ? "text-danger" : ""}`}>{fmt(w.balance)}</p>
+              <p className={`text-2xl font-medium tracking-tight tabular-nums ${w.balance < 0 ? "text-danger" : ""}`}><Balance>{fmt(w.balance)}</Balance></p>
               <div className="flex justify-between border-t border-rule pt-3 text-xs text-ink-3">
                 <span>In this month <b className="font-medium text-income">{fmt(w.monthIn)}</b></span>
                 <span>Out <b className="font-medium text-ink">{fmt(w.monthOut)}</b></span>
@@ -126,7 +131,7 @@ export default async function WalletsPage() {
                 <Link href={`/finance/wallets/${w.id}`} className="flex items-center gap-3 rounded-xl px-1 py-2 hover:bg-surface-2">
                   <AppIcon name={WALLET_TYPE_META[w.type].icon} size={32} color={w.color} />
                   <span className="flex-1 text-sm">{w.name}</span>
-                  <span className="text-sm tabular-nums text-ink-3">{fmt(w.balance)}</span>
+                  <span className="text-sm tabular-nums text-ink-3"><Balance>{fmt(w.balance)}</Balance></span>
                 </Link>
               </li>
             ))}
@@ -137,7 +142,7 @@ export default async function WalletsPage() {
       <StatsBar
         note={month.label}
         items={[
-          { label: "Total balance", value: fmt(total) },
+          { label: "Total balance", value: fmt(total), private: true },
           { label: "In this month", value: fmt(active.reduce((a, w) => a + w.monthIn, 0)) },
           { label: "Out this month", value: fmt(active.reduce((a, w) => a + w.monthOut, 0)) },
         ]}

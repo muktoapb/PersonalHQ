@@ -1,5 +1,6 @@
 import { cookies } from "next/headers";
 import { RecoveryKeyForm, UsernameForm } from "@/components/AccountForms";
+import { AppLockSettings } from "@/components/LockForms";
 import { InstallApp } from "@/components/Pwa";
 import { PaletteChoice, PasswordForm, ProfileForm, SignOutOthers, ThemeChoice } from "@/components/SettingsForms";
 import { isPalette } from "@/lib/palettes";
@@ -34,6 +35,17 @@ export default async function ProfileSettings() {
       <section className="card space-y-4">
         <h2 className="font-semibold">Change username</h2>
         <UsernameForm current={s.username ?? ""} />
+      </section>
+      <section className="card space-y-4">
+        <div>
+          <h2 className="font-semibold">App lock</h2>
+          <p className="text-sm text-ink-2">
+            {s.pinHash
+              ? "On. After a while without use, the app asks for your PIN."
+              : "Ask for a PIN after a while without use, like a banking app. You stay signed in; forgot the PIN? Sign in with your password."}
+          </p>
+        </div>
+        <AppLockSettings hasPin={!!s.pinHash} minutes={s.pinLockMinutes} />
       </section>
       <section className="card space-y-4">
         <h2 className="font-semibold">Change password</h2>

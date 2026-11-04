@@ -1,5 +1,7 @@
 import Link from "next/link";
 import { AppIcon } from "@/components/AppIcon";
+import { Balance } from "@/components/Balance";
+import { BalanceToggle } from "@/components/BalanceToggle";
 import { FinanceSummary } from "@/components/FinanceSummary";
 import { MenuList } from "@/components/MenuList";
 import { TransactionList } from "@/components/TransactionList";
@@ -46,8 +48,11 @@ export default async function FinancePage() {
       {walletRows.length > 0 && (
         <section className="card hidden lg:block">
           <div className="mb-3 flex items-baseline justify-between">
-            <h2 className="text-sm font-semibold">Wallets <span className="font-normal text-ink-3">· {formatMoney(walletTotal ?? 0, s.currency, s.locale, s.currencySymbol)} in total</span></h2>
-            <Link href="/finance/wallets" className="text-sm text-ink-3 hover:text-accent-text">All wallets →</Link>
+            <h2 className="text-sm font-semibold">Wallets <span className="font-normal text-ink-3">· <Balance>{formatMoney(walletTotal ?? 0, s.currency, s.locale, s.currencySymbol)}</Balance> in total</span></h2>
+            <span className="flex items-center gap-1">
+              <BalanceToggle className="-my-2 text-ink-3 hover:bg-surface-2 hover:text-ink" />
+              <Link href="/finance/wallets" className="text-sm text-ink-3 hover:text-accent-text">All wallets →</Link>
+            </span>
           </div>
           <ul className="flex flex-wrap gap-2">
             {walletRows.map((w) => (
@@ -56,7 +61,7 @@ export default async function FinancePage() {
                   <AppIcon name={WALLET_TYPE_META[w.type].icon} size={32} color={w.color} />
                   <span>
                     <span className="block text-xs text-ink-3">{w.name}</span>
-                    <span className={`block text-sm font-medium tabular-nums ${w.balance < 0 ? "text-danger" : ""}`}>{formatMoney(w.balance, s.currency, s.locale, s.currencySymbol)}</span>
+                    <span className={`block text-sm font-medium tabular-nums ${w.balance < 0 ? "text-danger" : ""}`}><Balance>{formatMoney(w.balance, s.currency, s.locale, s.currencySymbol)}</Balance></span>
                   </span>
                 </Link>
               </li>
@@ -72,6 +77,7 @@ export default async function FinancePage() {
           .map((p) => ({
             ...p,
             value: "kind" in p ? formatMoney(kindTotal[p.kind], s.currency, s.locale, s.currencySymbol) : p.href === "/finance/wallets" && walletTotal !== null ? formatMoney(walletTotal, s.currency, s.locale, s.currencySymbol) : undefined,
+            private: p.href === "/finance/wallets",
             hint: "kind" in p ? r.label : p.href === "/finance/wallets" ? (walletTotal === null ? "Bank, cash, bKash…" : "Total balance") : "Charts and trends",
           }))}
       />

@@ -113,3 +113,43 @@ export async function regenerateRecoveryKey(password: string): Promise<Result<{ 
   return { ok: true, recoveryKey };
 }
 
+
+// ---------- app lock PIN ----------
+
+export const LOCK_MINUTES = [1, 5, 15, 60] as const;
+
+// 4–6 digits, and not one digit repeated or a straight run (1234, 9876).
+export function checkPin(pin: string): string | null {
+  if (!/^\d{4,6}$/.test(pin)) return "Use 4 to 6 digits.";
+  const d = [...pin].map(Number);
+  const step = d[1] - d[0];
+  if (Math.abs(step) <= 1 && d.every((x, i) => i === 0 || x - d[i - 1] === step)) return "Pick a PIN that's harder to guess.";
+  return null;
+}
+
+// Setting or changing the PIN needs the password (a borrowed, unlocked
+// session shouldn't be enough to lock the owner out).
+export async function setPin(password: string, pin: string): Promise<Result> {
+  if (!(await confirmPassword(password))) return fail("Password is wrong.");
+  const bad = checkPin(pin);
+  if (bad) return fail(bad);
+  await db.update(settings).set({ pinHash: await hashSecret(pin) }).where(eq(settings.id, 1));
+  return { ok: true };
+}
+
+export async function removePin(password: string): Promise<Result> {
+  if (!(await confirmPassword(password))) return fail("Password is wrong.");
+  await db.update(settings).set({ pinHash: null }).where(eq(settings.id, 1));
+  return { ok: true };
+}
+
+export async function setLockMinutes(minutes: number): Promise<Result> {
+  if (!(LOCK_MINUTES as readonly number[]).includes(minutes)) return fail("Pick one of the options.");
+  await db.update(settings).set({ pinLockMinutes: minutes }).where(eq(settings.id, 1));
+  return { ok: true };
+}
+
+export async function verifyPin(pin: string): Promise<boolean> {
+  const s = await getSettings();
+  return !!s?.pinHash && (await verifySecret(pin, s.pinHash));
+}

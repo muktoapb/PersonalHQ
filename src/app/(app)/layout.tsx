@@ -8,6 +8,7 @@ import { type NavItem, SideNav } from "@/components/SideNav";
 import { CategoryDialog } from "@/components/NoteBoard";
 import { GroupDialog } from "@/components/TaskGroups";
 import { QuickAddSheet } from "@/components/QuickAddSheet";
+import { AppLock } from "@/components/AppLock";
 import { requireSession } from "@/lib/auth";
 import { listCategories as financeCategories } from "@/lib/core/finance";
 import { listCategories } from "@/lib/core/notes";
@@ -152,6 +153,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
         <QuickAddSheet trigger="fab" {...quickAdd} />
         <SheetGestures />
         <DesktopScroll />
+        <AppLock enabled={!!s.pinHash} />
       </div>
     </WalletsProvider>
   );

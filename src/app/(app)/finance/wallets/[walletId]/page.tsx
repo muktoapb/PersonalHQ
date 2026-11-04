@@ -1,6 +1,8 @@
 import { Star } from "@phosphor-icons/react/ssr";
 import { notFound, redirect } from "next/navigation";
 import { AppIcon } from "@/components/AppIcon";
+import { Balance } from "@/components/Balance";
+import { BalanceToggle } from "@/components/BalanceToggle";
 import { Pagination } from "@/components/Pagination";
 import { StatsBar } from "@/components/StatsBar";
 import { AdjustBalance, DeleteTransfer, TransferDialog, WalletArchiveButtons, WalletDialog } from "@/components/Wallets";
@@ -52,8 +54,8 @@ export default async function WalletPage({ params, searchParams }: Props) {
 
       <div className="grid gap-4 sm:grid-cols-[1.2fr_1fr]">
         <section className="card">
-          <p className="text-sm text-ink-3">Balance</p>
-          <p className={`mt-1 text-4xl font-medium tracking-tight tabular-nums ${w.balance < 0 ? "text-danger" : ""}`}>{fmt(w.balance)}</p>
+          <p className="flex items-center gap-1 text-sm text-ink-3">Balance <BalanceToggle className="-my-2 hover:bg-surface-2 hover:text-ink" /></p>
+          <p className={`mt-1 text-4xl font-medium tracking-tight tabular-nums ${w.balance < 0 ? "text-danger" : ""}`}><Balance>{fmt(w.balance)}</Balance></p>
           <div className="mt-4 grid grid-cols-2 gap-2 border-t border-rule pt-3 text-xs text-ink-3">
             <p>In this month<b className="block text-sm font-medium text-income">{fmt(w.monthIn)}</b></p>
             <p>Out this month<b className="block text-sm font-medium text-ink">{fmt(w.monthOut)}</b></p>
@@ -115,13 +117,13 @@ export default async function WalletPage({ params, searchParams }: Props) {
           </ul>
         )}
         <Pagination page={page} pages={pages} total={history.total} perPage={PER_PAGE} />
-        <p className="border-t border-rule pt-3 text-xs text-ink-3">Starting balance {fmt(w.openingBalance)}. Edit or delete income and expenses from their own pages.</p>
+        <p className="border-t border-rule pt-3 text-xs text-ink-3">Starting balance <Balance>{fmt(w.openingBalance)}</Balance>. Edit or delete income and expenses from their own pages.</p>
       </section>
 
       <StatsBar
         note={month.label}
         items={[
-          { label: "Balance", value: fmt(w.balance) },
+          { label: "Balance", value: fmt(w.balance), private: true },
           { label: "In", value: fmt(w.monthIn) },
           { label: "Out", value: fmt(w.monthOut) },
           { label: "Entries", value: String(history.total) },
