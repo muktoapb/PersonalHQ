@@ -127,6 +127,13 @@
       "when": 1793778173674,
       "tag": "0017_nostalgic_firelord",
       "breakpoints": true
+    },
+    {
+      "idx": 18,
+      "version": "6",
+      "when": 1793803893802,
+      "tag": "0018_hot_sway",
+      "breakpoints": true
     }
   ]
 }

@@ -74,7 +74,10 @@ export default async function OverviewPage() {
       <section className="hero flex items-center gap-6">
         <div className="min-w-0 flex-1">
           <p className="text-sm text-white/75">
-            {greeting}{s.displayName ? `, ${s.displayName}` : ""} · {new Date().toLocaleDateString(s.locale, { weekday: "long", month: "long", day: "numeric" })}
+            {greeting}{s.displayName ? `, ${s.displayName}` : ""}
+            {/* phones: the date on its own line; wider screens: "… · date" */}
+            <span className="hidden sm:inline"> · </span>
+            <span className="block sm:inline">{new Date().toLocaleDateString(s.locale, { weekday: "long", month: "long", day: "numeric" })}</span>
           </p>
           <h1 className="mt-3 text-3xl font-semibold leading-tight sm:text-[44px]">{headline}</h1>
           <div className="mt-7 flex flex-wrap gap-3">

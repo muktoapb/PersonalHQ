@@ -114,6 +114,11 @@ export async function financePrefsAction(_: FormState, fd: FormData): Promise<Fo
   });
 }
 
+// Settings › Profile, or filled in from the browser the first time (TimeZoneSync).
+export async function timeZoneAction(timeZone: string): Promise<FormState> {
+  return savePrefs({ timeZone });
+}
+
 export async function weekStartAction(_: FormState, fd: FormData): Promise<FormState> {
   return savePrefs({ weekStart: Number(str(fd, "weekStart")) });
 }

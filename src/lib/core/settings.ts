@@ -6,14 +6,18 @@ import { z } from "zod";
 import { db } from "@/db/client";
 import { categories, settings, type TransactionKind } from "@/db/schema";
 import { hashSecret, newSecret, verifySecret } from "@/lib/secrets";
+import { applyTimeZone, isTimeZone } from "@/lib/timezone";
 import { checkPassword, hashKey, newRecoveryKey, usernameSchema } from "./credentials";
 import { type Result, fail } from "./result";
 
 // The single settings row, read per request. connection() keeps every page
 // that depends on it dynamic: it must never be prerendered at build time.
+// Reading it also keeps the server on the owner's time zone.
 export const getSettings = cache(async () => {
   await connection();
-  return (await db.select().from(settings).where(eq(settings.id, 1)).limit(1))[0] ?? null;
+  const row = (await db.select().from(settings).where(eq(settings.id, 1)).limit(1))[0] ?? null;
+  applyTimeZone(row?.timeZone);
+  return row;
 });
 
 const currency = z
@@ -44,6 +48,7 @@ export const preferencesSchema = z
     currencySymbol: z.string().trim().max(4).nullable().transform((v) => v || null),
     locale: z.string().trim().min(2).max(20),
     weekStart: z.union([z.literal(0), z.literal(1), z.literal(6)]),
+    timeZone: z.string().max(64).refine(isTimeZone, "Unknown time zone."),
     ...trackShape,
   })
   .partial();
@@ -82,6 +87,7 @@ export async function updatePreferences(input: unknown): Promise<Result> {
   const parsed = preferencesSchema.safeParse(input);
   if (!parsed.success) return fail(parsed.error.issues[0].message);
   await db.update(settings).set(parsed.data).where(eq(settings.id, 1));
+  applyTimeZone(parsed.data.timeZone);
   return { ok: true };
 }
 

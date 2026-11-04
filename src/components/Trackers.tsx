@@ -1,6 +1,6 @@
 "use client";
 
-import { ArrowDown, ArrowUp, ChartBar, Check, CheckCircle, Fire, Gauge, HourglassMedium, PencilSimple, Smiley, Trash, X } from "@phosphor-icons/react/ssr";
+import { ArrowDown, ArrowUp, ChartBar, Check, CheckCircle, Fire, Gauge, HourglassMedium, PencilSimple, Plus, Smiley, Trash, X } from "@phosphor-icons/react/ssr";
 import { haptic } from "@/lib/haptics";
 import Link from "next/link";
 import { useActionState, useOptimistic, useRef, useState, useTransition } from "react";
@@ -280,7 +280,7 @@ export function TrackerStart() {
       <div className="flex justify-center"><AppIcon name="trackers" size={56} /></div>
       <div>
         <p className="font-medium">Track anything</p>
-        <p className="text-sm text-ink-3">Habits, amounts or readings — with targets to turn them into goals. Start with one, or <Link href="/trackers/new" className="font-medium text-accent-text hover:underline">make your own</Link>:</p>
+        <p className="text-sm text-ink-3">Habits, amounts or readings — with targets to turn them into goals. Start with one of these:</p>
       </div>
       <div className="flex flex-wrap justify-center gap-2">
         {STARTERS.map((s) => (
@@ -293,6 +293,10 @@ export function TrackerStart() {
         ))}
       </div>
       {state.error && <p role="alert" className="text-sm text-danger">{state.error}</p>}
+      <div className="flex items-center gap-3 text-xs text-ink-3" aria-hidden>
+        <span className="h-px flex-1 bg-rule" /> or <span className="h-px flex-1 bg-rule" />
+      </div>
+      <Link href="/trackers/new" className="btn btn-primary w-full sm:w-auto"><Plus size={16} weight="bold" /> Make your own tracker</Link>
     </div>
   );
 }
@@ -448,32 +452,29 @@ export function HabitCalendar({ trackerId, days, color, today, weekStart = 1 }: 
   const [y, m, d0] = today.split("-").map(Number);
   const now = new Date(y, m - 1, d0);
   const monday = new Date(y, m - 1, d0 - ((now.getDay() - weekStart + 7) % 7)); // first day of this week
-  const weeks = 18;
+  // The last 18 weeks, ending with this one; phones show the last 12. Squares
+  // share the card's width (no sideways scrolling), so today is always in view.
+  const weeks = 18, phoneWeeks = 12;
   const key = (d: Date) => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
   const cols = Array.from({ length: weeks }, (_, w) => Array.from({ length: 7 }, (_, dd) => new Date(monday.getFullYear(), monday.getMonth(), monday.getDate() - (weeks - 1 - w) * 7 + dd)));
   return (
-    <div className="overflow-x-auto [scrollbar-width:none]">
-      <div className="flex min-w-max gap-1">
-        <div className="mr-1 flex flex-col gap-1 text-[10px] text-ink-3" aria-hidden>
-          {Array.from({ length: 7 }, (_, i) => (
-            <span key={i} className="flex h-5 items-center">{i % 2 ? "" : "SMTWTFS"[(weekStart + i) % 7]}</span>
-          ))}
-        </div>
-        {cols.map((col, w) => (
-          <div key={w} className="flex flex-col gap-1">
-            {col.map((d) => {
-              const k = key(d), on = set.has(k), future = k > today;
-              return (
-                <button key={k} disabled={future} onClick={() => start(async () => { haptic(); toggle(k); await toggleCheckAction(trackerId, k); })}
-                  title={`${d.toLocaleDateString("en-US", { weekday: "short", month: "short", day: "numeric" })}${on ? " · done" : ""}`}
-                  aria-label={`${d.toDateString()}: ${on ? "done" : "not done"}`} aria-pressed={on}
-                  className={`size-5 rounded-[5px] transition ${future ? "opacity-0" : on ? "" : "bg-surface-2 hover:ring-2 hover:ring-accent/40"} ${k === today ? "ring-2 ring-accent" : ""}`}
-                  style={on ? { background: color } : undefined} />
-              );
-            })}
-          </div>
-        ))}
-      </div>
+    // column by column: day letters, then one column per week
+    <div className="grid max-w-sm grid-flow-col grid-cols-[auto_repeat(12,minmax(0,1fr))] grid-rows-7 gap-[3px] sm:max-w-xl sm:grid-cols-[auto_repeat(18,minmax(0,1fr))] sm:gap-1">
+      {Array.from({ length: 7 }, (_, i) => (
+        <span key={i} aria-hidden className="flex items-center pr-1 text-[10px] text-ink-3">{i % 2 ? "" : "SMTWTFS"[(weekStart + i) % 7]}</span>
+      ))}
+      {cols.flatMap((col, w) =>
+        col.map((d) => {
+          const k = key(d), on = set.has(k), future = k > today;
+          return (
+            <button key={k} disabled={future} onClick={() => start(async () => { haptic(); toggle(k); await toggleCheckAction(trackerId, k); })}
+              title={`${d.toLocaleDateString("en-US", { weekday: "short", month: "short", day: "numeric" })}${on ? " · done" : ""}`}
+              aria-label={`${d.toDateString()}: ${on ? "done" : "not done"}`} aria-pressed={on}
+              className={`aspect-square w-full rounded-[4px] transition sm:rounded-[5px] ${w < weeks - phoneWeeks ? "hidden sm:block" : ""} ${future ? "opacity-0" : on ? "" : "bg-surface-2 hover:ring-2 hover:ring-accent/40"} ${k === today ? "ring-2 ring-accent" : ""}`}
+              style={on ? { background: color } : undefined} />
+          );
+        }),
+      )}
     </div>
   );
 }

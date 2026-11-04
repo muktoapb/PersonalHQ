@@ -10,10 +10,14 @@ All notable changes to PersonalHQ. Versions follow [Semantic Versioning](https:/
 - **Hide wallet balances** — balances show as `****` by default on Finance and Wallets pages; the eye button reveals them until you leave the page.
 - **Notifications** — a bell (phone top bar; desktop bottom-left, where sign-out was) lists overdue tasks, tasks due today, reminders that went off and reminders coming up. The badge counts unread; opening the list marks it read on every device.
 
+- **Your time zone** — "today", due dates, reminders, the greeting and month boundaries follow your time zone, not the server's (UTC in Docker). It's taken from your browser the first time and can be changed in Settings › Profile; AI assistants (MCP) use it too.
+
 ### Changed
 - Phones: the top bar scrolls away with the page, page titles have no icon, and the system bars match the app's background (light/dark and colour theme).
 - Desktop: sign out moved to Settings › Profile.
 - Finance: the period sits under the title.
+- Trackers: a clear "Make your own tracker" button when there are none; on phones the habit calendar fits the screen (last 12 weeks, today in view) and Edit sits beside the title.
+- Overview: on phones the date sits on its own line under the greeting.
 - Analytics: "Last 3 months" and "Last 6 months" are rolling windows (4 Aug – 4 Nov), not calendar months.
 
 ### Fixed

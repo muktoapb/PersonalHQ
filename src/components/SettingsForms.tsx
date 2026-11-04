@@ -1,9 +1,9 @@
 "use client";
 
 import { Bell, Check, Copy, Desktop, Moon, Sun, Trash, UploadSimple, X } from "@phosphor-icons/react/ssr";
-import { useActionState, useEffect, useRef, useState, useTransition } from "react";
+import { useActionState, useEffect, useRef, useState, useTransition, useSyncExternalStore } from "react";
 import type { Label, Settings } from "@/db/schema";
-import { financePrefsAction, passwordAction, profileAction, signOutOthersAction, weekStartAction } from "@/lib/actions/auth";
+import { type FormState, financePrefsAction, passwordAction, profileAction, signOutOthersAction, timeZoneAction, weekStartAction } from "@/lib/actions/auth";
 import { createMcpTokenAction, importBackupAction, revokeMcpTokenAction } from "@/lib/actions/data";
 import { disconnectAppAction } from "@/lib/actions/oauth";
 import type { Connection } from "@/lib/mcp/oauth";
@@ -20,6 +20,44 @@ const Status = ({ state }: { state: { error?: string; ok?: boolean } }) =>
   state.error ? <p role="alert" className="text-sm text-danger">{state.error}</p> : state.ok ? <p role="status" className="text-sm text-income">Saved.</p> : null;
 
 // ---------- profile ----------
+
+// Snapshots must be stable between calls, so the zone list is built once.
+let zoneList: string[] | undefined;
+const allZones = () => (zoneList ??= Intl.supportedValuesOf("timeZone"));
+const NO_ZONES: string[] = [];
+const noZones = () => NO_ZONES;
+
+// The time zone "today" and times are worked out in, with this device's as a one-tap fix.
+export function TimeZoneForm({ value }: { value: string | null }) {
+  const [tz, setTz] = useState(value ?? "");
+  const [state, setState] = useState<FormState>({});
+  const [pending, start] = useTransition();
+  const device = useSyncExternalStore(() => () => {}, () => Intl.DateTimeFormat().resolvedOptions().timeZone, () => "");
+  const zones = useSyncExternalStore(() => () => {}, allZones, noZones);
+  const save = (next: string) => {
+    setTz(next);
+    start(async () => setState(await timeZoneAction(next)));
+  };
+  const options = tz && !zones.includes(tz) ? [tz, ...zones] : zones;
+  return (
+    <div className="space-y-2">
+      <div className="flex flex-wrap items-end gap-3">
+        <div className="min-w-56 flex-1">
+          <label className="label" htmlFor="timeZone">Time zone</label>
+          <select id="timeZone" value={tz} disabled={pending} onChange={(e) => save(e.target.value)} className="input">
+            {!tz && <option value="">Not set</option>}
+            {options.map((z) => <option key={z} value={z}>{z.replace(/_/g, " ")}</option>)}
+          </select>
+        </div>
+        {device && device !== tz && (
+          <button type="button" disabled={pending} onClick={() => save(device)} className="btn btn-ghost">Use this device&apos;s ({device.replace(/_/g, " ")})</button>
+        )}
+      </div>
+      <p className="text-xs text-ink-3">&ldquo;Today&rdquo;, due dates, reminders and the greeting follow this, on every device and for AI assistants.</p>
+      <div className="empty:hidden"><Status state={state} /></div>
+    </div>
+  );
+}
 
 export function ProfileForm({ name, space }: { name: string | null; space: string | null }) {
   const [state, action, pending] = useActionState(profileAction, {});

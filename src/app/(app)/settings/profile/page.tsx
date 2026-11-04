@@ -2,7 +2,7 @@ import { cookies } from "next/headers";
 import { RecoveryKeyForm, UsernameForm } from "@/components/AccountForms";
 import { AppLockSettings } from "@/components/LockForms";
 import { InstallApp } from "@/components/Pwa";
-import { PaletteChoice, PasswordForm, ProfileForm, SignOutOthers, ThemeChoice } from "@/components/SettingsForms";
+import { PaletteChoice, PasswordForm, ProfileForm, SignOutOthers, ThemeChoice, TimeZoneForm } from "@/components/SettingsForms";
 import { isPalette } from "@/lib/palettes";
 import { requireSession } from "@/lib/auth";
 import { logoutAction } from "@/lib/actions/auth";
@@ -21,6 +21,7 @@ export default async function ProfileSettings() {
       <section className="card space-y-4">
         <h2 className="font-semibold">You</h2>
         <ProfileForm name={s.displayName} space={s.spaceName} />
+        <div className="border-t border-rule pt-4"><TimeZoneForm value={s.timeZone} /></div>
       </section>
       <section className="card space-y-4">
         <h2 className="font-semibold">Theme</h2>

@@ -5,4 +5,9 @@ export async function register() {
   const { migrate } = await import("drizzle-orm/libsql/migrator");
   const { db } = await import("@/db/client");
   await migrate(db, { migrationsFolder: "drizzle" });
+  // Start on the owner's time zone (MCP calls don't always read settings first).
+  const { settings } = await import("@/db/schema");
+  const { applyTimeZone } = await import("@/lib/timezone");
+  const [row] = await db.select({ timeZone: settings.timeZone }).from(settings).limit(1);
+  applyTimeZone(row?.timeZone);
 }

@@ -38,15 +38,15 @@ export default async function TrackerPage({ params }: Props) {
 
   return (
     <div className="mx-auto max-w-4xl space-y-5">
-      <div className="flex flex-wrap items-center gap-3">
-        <div className="flex min-w-0 basis-full items-center gap-3 sm:basis-0 sm:flex-1">
+      <div className="flex items-center gap-3">
+        <div className="flex min-w-0 flex-1 items-center gap-3">
           <span className="hidden lg:block"><AppIcon name={t.icon} size={48} color={t.color} /></span>
           <div className="min-w-0">
             <h1 className="truncate text-3xl font-semibold">{t.name}</h1>
             <p className="text-sm text-ink-3">{subtitle}</p>
           </div>
         </div>
-        <Link href={`/trackers/${t.id}/edit`} className="btn btn-ghost"><PencilSimple size={16} /> Edit</Link>
+        <Link href={`/trackers/${t.id}/edit`} aria-label="Edit tracker" className="btn btn-ghost shrink-0"><PencilSimple size={16} /> <span className="hidden sm:inline">Edit</span></Link>
       </div>
 
       {since ? (

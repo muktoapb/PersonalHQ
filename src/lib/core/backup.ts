@@ -48,7 +48,7 @@ const TABLES = {
 } satisfies Record<string, Table>;
 type TableName = keyof typeof TABLES;
 
-const PREF_KEYS = ["displayName", "spaceName", "currency", "currencySymbol", "locale", "weekStart", "manageDonation", "manageInvestment"] as const;
+const PREF_KEYS = ["displayName", "spaceName", "currency", "currencySymbol", "locale", "timeZone", "weekStart", "manageDonation", "manageInvestment"] as const;
 
 export async function exportAll() {
   const s = await getSettings();

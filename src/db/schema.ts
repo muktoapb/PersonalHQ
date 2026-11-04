@@ -24,6 +24,9 @@ export const settings = sqliteTable("settings", {
   // Shown instead of the currency code when set (e.g. "৳" for BDT).
   currencySymbol: text("currency_symbol"),
   locale: text("locale").notNull().default("en-US"),
+  // IANA time zone (e.g. "Asia/Kuala_Lumpur"): the server works out "today"
+  // and times in it (lib/timezone.ts). Filled from the browser on first use.
+  timeZone: text("time_zone"),
   // Sign-in name (lowercase). Null only on installs made before usernames;
   // they're asked to pick one (and save a recovery key) after signing in.
   username: text("username"),

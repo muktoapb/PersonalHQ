@@ -9,6 +9,7 @@ import { CategoryDialog } from "@/components/NoteBoard";
 import { GroupDialog } from "@/components/TaskGroups";
 import { QuickAddSheet } from "@/components/QuickAddSheet";
 import { AppLock } from "@/components/AppLock";
+import { TimeZoneSync } from "@/components/TimeZoneSync";
 import { requireSession } from "@/lib/auth";
 import { listCategories as financeCategories } from "@/lib/core/finance";
 import { listCategories } from "@/lib/core/notes";
@@ -156,6 +157,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
         <SheetGestures />
         <DesktopScroll />
         <AppLock enabled={!!s.pinHash} />
+        <TimeZoneSync saved={s.timeZone} />
       </div>
     </WalletsProvider>
   );
