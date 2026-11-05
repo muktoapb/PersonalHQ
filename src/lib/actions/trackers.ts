@@ -3,7 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { requireSession } from "@/lib/auth";
-import { addEntry, createTracker, deleteEntry, deleteTracker, setRating, toggleCheck, updateEntry, updateTracker } from "@/lib/core/trackers";
+import { addEntry, createTracker, deleteEntry, deleteTracker, kindFields, setRating, toggleCheck, updateEntry, updateTracker } from "@/lib/core/trackers";
 import { today } from "@/lib/dates";
 import type { FormState } from "./auth";
 
@@ -18,32 +18,21 @@ const done = (res: { ok: boolean; error?: string }): FormState => {
   return { ok: true };
 };
 
-// Fields by kind, so switching kinds never leaves stale settings behind:
-// readings keep a start value; habits have no unit and a goal of N done days
-// per day/week/month (a daily habit is 1 a day); amounts/averages can have a
-// limit instead of a minimum and a quick-add step; "days since" counts days
-// (target = days); ratings are 1–5 with no target.
-const trackerFields = (fd: FormData) => {
-  const mode = str(fd, "mode") || "latest";
-  const amount = mode === "total" || mode === "average";
-  const period = mode === "check" || amount ? str(fd, "period") || (mode === "check" ? "day" : "month") : "all";
-  return {
-    name: str(fd, "name"),
-    icon: str(fd, "icon") || undefined,
-    color: str(fd, "color") || undefined,
-    unit: mode === "latest" || amount ? str(fd, "unit") : "",
-    mode,
-    period,
-    start: mode === "latest" ? numOrNull(str(fd, "start")) : null,
-    target:
-      mode === "check" ? (period === "day" ? 1 : (numOrNull(str(fd, "target")) ?? 1))
-      : mode === "rating" ? null
-      : numOrNull(str(fd, "target")),
-    targetDate: mode === "latest" || amount ? str(fd, "targetDate") || null : null,
-    goal: amount && str(fd, "goal") === "atMost" ? "atMost" : "atLeast",
-    quickAdd: amount ? numOrNull(str(fd, "quickAdd")) : null,
-  };
-};
+const trackerFields = (fd: FormData) => ({
+  name: str(fd, "name"),
+  icon: str(fd, "icon") || undefined,
+  color: str(fd, "color") || undefined,
+  ...kindFields({
+    mode: str(fd, "mode"),
+    period: str(fd, "period"),
+    unit: str(fd, "unit"),
+    start: numOrNull(str(fd, "start")),
+    target: numOrNull(str(fd, "target")),
+    targetDate: str(fd, "targetDate"),
+    goal: str(fd, "goal"),
+    quickAdd: numOrNull(str(fd, "quickAdd")),
+  }),
+});
 
 // Saving (new or edited) goes to the tracker's page. A new "days since"
 // tracker starts counting from its `since` date (its first reset).

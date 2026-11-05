@@ -46,6 +46,28 @@ export const trackerSchema = z.object({
 });
 export const trackerPatchSchema = z.object(trackerFields).partial();
 
+// Fields by kind, so switching kinds never leaves stale settings behind:
+// readings keep a start value; habits have no unit and a goal of N done days
+// per day/week/month (a daily habit is 1 a day); amounts/averages can have a
+// limit instead of a minimum and a quick-add step; "days since" counts days
+// (target = days); ratings are 1–5 with no target. Shared by the form and MCP.
+type KindInput = { mode?: string; period?: string; unit?: string; start?: number | null; target?: number | null; targetDate?: string | null; goal?: string; quickAdd?: number | null };
+export function kindFields(k: KindInput) {
+  const mode = k.mode || "latest";
+  const amount = mode === "total" || mode === "average";
+  const period = mode === "check" || amount ? k.period || (mode === "check" ? "day" : "month") : "all";
+  return {
+    mode,
+    period,
+    unit: mode === "latest" || amount ? (k.unit ?? "") : "",
+    start: mode === "latest" ? (k.start ?? null) : null,
+    target: mode === "check" ? (period === "day" ? 1 : (k.target ?? 1)) : mode === "rating" ? null : (k.target ?? null),
+    targetDate: mode === "latest" || amount ? k.targetDate || null : null,
+    goal: amount && k.goal === "atMost" ? "atMost" : "atLeast",
+    quickAdd: amount ? (k.quickAdd ?? null) : null,
+  };
+}
+
 const entryFields = { date: z.iso.date("Pick a date."), value: number(), note: z.string().trim().max(300).nullable() };
 export const entrySchema = z.object({ ...entryFields, note: entryFields.note.default(null) });
 export const entryPatchSchema = z.object(entryFields).partial();
