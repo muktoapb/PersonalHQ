@@ -10,6 +10,10 @@ import { DueChip } from "./TaskView";
 
 // The overview's tickable rows: a task due soon, and a habit for today.
 
+// Overview rows keep titles short: cap the length, then an ellipsis. Phones
+// allow 30 characters, desktop (lg+) 70 — rendered as two spans, CSS picks one.
+const clip = (s: string, n: number) => (s.length > n ? `${s.slice(0, n).trimEnd()}…` : s);
+
 function Tick({ on, color, label, onToggle }: { on: boolean; color: string; label: string; onToggle: () => void }) {
   return (
     <button
@@ -36,7 +40,10 @@ export function TaskRow({ t, group, today }: {
     <li className="flex items-center gap-3 py-2.5">
       <Tick on={done} color={group.color} label={`Mark "${t.title}" done`} onToggle={() => start(async () => { setDone(true); await updateTaskAction(t.id, { status: "done" }); })} />
       <div className="min-w-0 flex-1">
-        <p className={`truncate text-sm font-medium ${done ? "text-ink-3 line-through" : ""}`}>{t.title}</p>
+        <p className={`truncate text-sm font-medium ${done ? "text-ink-3 line-through" : ""}`}>
+          <span className="lg:hidden">{clip(t.title, 30)}</span>
+          <span className="hidden lg:inline">{clip(t.title, 70)}</span>
+        </p>
         <p className="mt-0.5 flex flex-wrap items-center gap-x-3 text-xs">
           <DueChip due={t.due} time={t.dueTime} today={today} done={done} />
           <Link href={`/tasks/${group.id}`} className="inline-flex items-center gap-1 text-ink-3 hover:text-accent-text">
