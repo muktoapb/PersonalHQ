@@ -112,13 +112,13 @@ export default async function OverviewPage() {
             {shownNotes.length ? (
               <ul className="grid gap-3 sm:grid-cols-2">
                 {shownNotes.map((n) => (
-                  <li key={n.id}>
+                  <li key={n.id} className="min-w-0">
                     <Link href={n.categoryId ? `/notes/${n.categoryId}` : "/notes"} className="block h-full rounded-2xl border border-rule p-3.5 transition hover:border-accent/50">
                       <p className="flex items-center gap-1.5 truncate text-sm font-medium">
                         {n.pinned && <PushPin size={13} weight="fill" className="shrink-0 text-accent-text" aria-label="Pinned" />}
                         {n.title || (n.items?.length ? "Checklist" : "Note")}
                       </p>
-                      <p className="mt-1 line-clamp-3 whitespace-pre-line text-xs text-ink-2">
+                      <p className="mt-1 line-clamp-3 whitespace-pre-line break-words text-xs text-ink-2">
                         {n.items?.length ? n.items.map((i) => `${i.done ? "☑" : "☐"} ${i.text}`).join("\n") : n.body}
                       </p>
                     </Link>
