@@ -1,4 +1,4 @@
-import { ArrowRight, PushPin } from "@phosphor-icons/react/ssr";
+import { ArrowRight } from "@phosphor-icons/react/ssr";
 import Link from "next/link";
 import { AppIcon, type IconName } from "@/components/AppIcon";
 import { HeroArt } from "@/components/HeroArt";
@@ -7,7 +7,6 @@ import { StatsBar } from "@/components/StatsBar";
 import { ProgressBar, ProgressLine } from "@/components/Trackers";
 import { requireSession } from "@/lib/auth";
 import { summarize } from "@/lib/core/finance";
-import { listNotes } from "@/lib/core/notes";
 import { listGroups, listTasks } from "@/lib/core/tasks";
 import { listTrackers } from "@/lib/core/trackers";
 import { daysFromToday, monthRange, today as todayStr } from "@/lib/dates";
@@ -35,18 +34,17 @@ function Card({ title, icon, href, more, className = "", children }: { title: st
 
 const Empty = ({ children }: { children: React.ReactNode }) => <p className="py-3 text-sm text-ink-3">{children}</p>;
 
-// The day at a glance: what's due, today's habits, trackers, pinned notes,
-// and a small money line.
+// The day at a glance: what's due, today's habits, trackers, and a small
+// money line.
 export default async function OverviewPage() {
   const s = await requireSession();
   const today = todayStr();
   const weekAhead = daysFromToday(7);
   const month = monthRange();
-  const [groups, tasks, trackers, notes, money] = await Promise.all([
+  const [groups, tasks, trackers, money] = await Promise.all([
     listGroups(),
     listTasks(),
     listTrackers(),
-    listNotes(),
     summarize({ from: month.from, to: month.to }),
   ]);
 
@@ -61,7 +59,6 @@ export default async function OverviewPage() {
   const daily = habits.filter((h) => h.period === "day");
   const habitsLeft = daily.filter((h) => !h.summary.doneToday).length;
   const others = trackers.filter((t) => t.mode !== "check").slice(0, 4);
-  const shownNotes = notes.slice(0, 4);
 
   const hour = new Date().getHours();
   const greeting = hour < 12 ? "Good morning" : hour < 18 ? "Good afternoon" : "Good evening";
@@ -105,28 +102,6 @@ export default async function OverviewPage() {
             )}
             {open.length > shownTasks.length && (
               <p className="pt-2 text-xs text-ink-3">{plural(open.length - shownTasks.length, "more open task")} — see all tasks.</p>
-            )}
-          </Card>
-
-          <Card className="order-3 md:order-none" title="Notes" icon="notes" href="/notes" more="All notes">
-            {shownNotes.length ? (
-              <ul className="grid gap-3 sm:grid-cols-2">
-                {shownNotes.map((n) => (
-                  <li key={n.id} className="min-w-0">
-                    <Link href={n.categoryId ? `/notes/${n.categoryId}` : "/notes"} className="block h-full rounded-2xl border border-rule p-3.5 transition hover:border-accent/50">
-                      <p className="flex items-center gap-1.5 truncate text-sm font-medium">
-                        {n.pinned && <PushPin size={13} weight="fill" className="shrink-0 text-accent-text" aria-label="Pinned" />}
-                        {n.title || (n.items?.length ? "Checklist" : "Note")}
-                      </p>
-                      <p className="mt-1 line-clamp-3 whitespace-pre-line break-words text-xs text-ink-2">
-                        {n.items?.length ? n.items.map((i) => `${i.done ? "☑" : "☐"} ${i.text}`).join("\n") : n.body}
-                      </p>
-                    </Link>
-                  </li>
-                ))}
-              </ul>
-            ) : (
-              <Empty>No notes yet.</Empty>
             )}
           </Card>
         </div>

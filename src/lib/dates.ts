@@ -6,6 +6,9 @@ export const today = () => ymd(new Date());
 // The calendar date n days from today.
 export const daysFromToday = (n: number) => { const d = new Date(); d.setDate(d.getDate() + n); return ymd(d); };
 
+// The calendar date n days after a "YYYY-MM-DD".
+export const addDays = (d: string, n: number) => { const [y, m, day] = d.split("-").map(Number); return ymd(new Date(y, m - 1, day + n)); };
+
 // The last n months as "YYYY-MM", oldest first, ending with the current month.
 export function lastMonths(n: number) {
   const now = new Date();

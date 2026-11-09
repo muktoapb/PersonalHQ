@@ -134,6 +134,13 @@
       "when": 1793803893802,
       "tag": "0018_hot_sway",
       "breakpoints": true
+    },
+    {
+      "idx": 19,
+      "version": "6",
+      "when": 1794216548584,
+      "tag": "0019_perfect_joystick",
+      "breakpoints": true
     }
   ]
 }

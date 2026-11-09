@@ -211,6 +211,9 @@ export const tasks = sqliteTable(
     status: text("status", { enum: TASK_STATUSES }).notNull().default("todo"),
     due: text("due"), // "YYYY-MM-DD"
     dueTime: text("due_time"), // "HH:MM", optional
+    // Recurrence: days between occurrences (1–30), null = one-off. Completing a
+    // recurring task rolls it to its next date instead of finishing it.
+    repeatEvery: integer("repeat_every"),
     // Reminder: minutes before the due moment (0 = at it), and that moment
     // as an absolute instant, computed in the browser so it uses the user's
     // time zone. remindedAt is set once the reminder has been shown.

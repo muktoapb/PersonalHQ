@@ -3,7 +3,7 @@ import { and, asc, count, eq, gte, inArray, isNull, lt, lte, ne, sql } from "dri
 import { z } from "zod";
 import { db } from "@/db/client";
 import { LIST_VIEWS, labels, taskColumns, taskGroups, taskLabels, taskNotes, tasks } from "@/db/schema";
-import { today } from "@/lib/dates";
+import { addDays, today } from "@/lib/dates";
 import { GROUP_ICONS } from "@/lib/group-icons";
 import { type Result, fail } from "./result";
 
@@ -11,7 +11,8 @@ import { type Result, fail } from "./result";
 // group has its own board columns; a column can count as "done", and a task's
 // status (todo/done) always matches its column. Tasks can have subtasks (one
 // level, rows with parentId), labels, short notes, and a due date with an
-// optional time and reminder. Counts and views only consider top-level tasks.
+// optional time, reminder and repeat interval. Counts and views only consider
+// top-level tasks.
 
 const name = z.string().trim().min(1, "Name required.").max(60);
 const color = z.string().regex(/^#[0-9a-fA-F]{6}$/);
@@ -28,7 +29,8 @@ export const groupSchema = z.object({
   view: groupFields.view.default("list"),
 });
 export const groupPatchSchema = z.object(groupFields).partial();
-export const taskSchema = z.object({ groupId: z.uuid(), parentId: z.uuid().nullish(), columnId: z.uuid().nullish(), title, due: optional(z.iso.date()) });
+const repeatEvery = z.number().int().min(1, "Repeat every 1–30 days.").max(30, "Repeat every 1–30 days.");
+export const taskSchema = z.object({ groupId: z.uuid(), parentId: z.uuid().nullish(), columnId: z.uuid().nullish(), title, due: optional(z.iso.date()), repeatEvery: repeatEvery.nullish() });
 export const taskPatchSchema = z
   .object({
     title,
@@ -38,6 +40,7 @@ export const taskPatchSchema = z
     dueTime: optional(z.string().regex(/^\d{2}:\d{2}$/, "Use HH:MM.")),
     remindOffset: z.number().int().min(0).max(60 * 24 * 7).nullable(),
     remindAt: z.iso.datetime().nullable(),
+    repeatEvery: repeatEvery.nullable(),
   })
   .partial();
 // .partial() keeps the colour default out of updates (labelSchema.partial() would apply it).
@@ -260,19 +263,20 @@ export async function getTask(id: string) {
 // Status and column move together: a task in a "done" column is done.
 // Ticking a top-level task moves it to the first done column (unticking: to
 // the first open one); with no such column it is just flagged. Subtasks only
-// toggle. A changed reminder will fire again.
+// toggle. A changed reminder will fire again. Completing a repeating task rolls
+// it forward instead (see below) rather than finishing it.
 export async function updateTask(id: string, input: unknown): Promise<Result> {
   const p = taskPatchSchema.safeParse(input);
   if (!p.success) return fail(p.error.issues[0].message);
-  const [cur] = await db.select({ groupId: tasks.groupId, parentId: tasks.parentId }).from(tasks).where(eq(tasks.id, id));
+  const [cur] = await db.select().from(tasks).where(eq(tasks.id, id));
   if (!cur) return fail("Task not found.");
   const { status, columnId, ...rest } = p.data;
   const patch: Partial<typeof tasks.$inferInsert> = { ...rest, updatedAt: now() };
   if (rest.remindAt !== undefined) patch.remindedAt = null;
 
   let done = status ? status === "done" : undefined;
-  if (!cur.parentId && (columnId || status)) {
-    const cols = await listColumns(cur.groupId);
+  const cols = !cur.parentId && (columnId || status) ? await listColumns(cur.groupId) : null;
+  if (cols) {
     const target = columnId ? cols.find((c) => c.id === columnId) : cols.find((c) => c.done === done);
     if (columnId && !target) return fail("Column not found.");
     if (target) {
@@ -280,6 +284,30 @@ export async function updateTask(id: string, input: unknown): Promise<Result> {
       done = target.done;
     }
   }
+
+  // A recurring top-level task doesn't finish when completed — it rolls to its
+  // next due date (skipping wholly-missed intervals), reschedules its reminder
+  // by the same number of days, resets its subtasks, and returns to an open
+  // column. `repeatEvery` is unchanged unless this call also edits it.
+  const repeat = rest.repeatEvery !== undefined ? rest.repeatEvery : cur.repeatEvery;
+  if (done && !cur.parentId && repeat) {
+    const t = today();
+    let next = addDays(cur.due ?? t, repeat);
+    while (next < t) next = addDays(next, repeat);
+    const dayMs = 86_400_000;
+    patch.status = "todo";
+    patch.completedAt = null;
+    patch.due = next;
+    patch.remindedAt = null;
+    patch.remindAt = cur.remindAt && cur.due ? new Date(Date.parse(cur.remindAt) + Math.round((Date.parse(next) - Date.parse(cur.due)) / dayMs) * dayMs).toISOString() : null;
+    patch.columnId = (cols ?? (await listColumns(cur.groupId))).find((c) => !c.done)?.id ?? cur.columnId;
+    await db.batch([
+      db.update(tasks).set(patch).where(eq(tasks.id, id)),
+      db.update(tasks).set({ status: "todo", completedAt: null, updatedAt: now() }).where(eq(tasks.parentId, id)),
+    ]);
+    return { ok: true };
+  }
+
   if (done !== undefined) {
     patch.status = done ? "done" : "todo";
     patch.completedAt = done ? now() : null;

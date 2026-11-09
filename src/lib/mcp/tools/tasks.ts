@@ -10,6 +10,7 @@ import { GROUP_ICONS } from "@/lib/group-icons";
 import { date, id, tool } from "./shared";
 
 const color = z.string().regex(/^#[0-9a-fA-F]{6}$/).describe("Hex colour, e.g. #7262ea");
+const repeatEvery = z.number().int().min(1).max(30).describe("Repeat every N days (1–30): 1 daily, 7 weekly, 30 ~monthly. Completing it rolls to the next date instead of finishing.");
 
 // Same rule as the task panel: a reminder fires `offset` minutes before the
 // due time (09:00 when no time is set); no due date means no reminder.
@@ -107,6 +108,7 @@ export const taskTools = [
           due: t.due,
           dueTime: t.dueTime,
           remindMinutesBefore: t.remindOffset,
+          repeatEvery: t.repeatEvery,
           labels: t.labels.map(({ id, name }) => ({ id, name })),
           subtasks: t.subtasks,
           notes: t.notes.map(({ id, body }) => ({ id, body })),
@@ -120,6 +122,7 @@ export const taskTools = [
       groupId: id("Task group"),
       title: z.string(),
       due: date.optional(),
+      repeatEvery: repeatEvery.optional(),
       parentId: id("Parent task").optional().describe("Makes this a subtask"),
       columnId: id("Column").optional().describe("Board column to start in; defaults to the first open one"),
     }),
@@ -128,7 +131,7 @@ export const taskTools = [
   tool({
     name: "update_task",
     description:
-      "Change a task: rename it, mark it done/todo, move it to a board column, set or clear (null) its due date and time, or set a reminder (minutes before the due time; 09:00 when no time). Moving to a done column finishes it.",
+      "Change a task: rename it, mark it done/todo, move it to a board column, set or clear (null) its due date and time, set a reminder (minutes before the due time; 09:00 when no time), or set/clear (null) a repeat interval. Moving to a done column finishes it — unless it repeats, in which case it rolls to its next date.",
     write: true,
     input: z.object({
       id: id("Task"),
@@ -138,6 +141,7 @@ export const taskTools = [
       due: date.nullable().optional(),
       dueTime: z.string().regex(/^\d{2}:\d{2}$/).nullable().optional().describe("HH:MM"),
       remindMinutesBefore: z.number().int().min(0).max(60 * 24 * 7).nullable().optional().describe("e.g. 0, 15, 60, 1440; null removes the reminder"),
+      repeatEvery: repeatEvery.nullable().optional().describe("null stops it repeating"),
     }),
     run: async ({ id, remindMinutesBefore, ...patch }) => {
       const timing = patch.due !== undefined || patch.dueTime !== undefined || remindMinutesBefore !== undefined;

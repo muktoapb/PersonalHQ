@@ -1,6 +1,6 @@
 "use client";
 
-import { ArrowLeft, ArrowRight, ArrowsLeftRight, Bell, CalendarBlank, ChatText, Check, CheckCircle, CheckSquare, DotsSixVertical, DotsThree, Kanban, ListChecks, PencilSimple, Plus, Trash, X } from "@phosphor-icons/react/ssr";
+import { ArrowLeft, ArrowRight, ArrowsClockwise, ArrowsLeftRight, Bell, CalendarBlank, ChatText, Check, CheckCircle, CheckSquare, DotsSixVertical, DotsThree, Kanban, ListChecks, PencilSimple, Plus, Trash, X } from "@phosphor-icons/react/ssr";
 import { haptic } from "@/lib/haptics";
 import { SectionFilterButton } from "./AppShell";
 import Link from "next/link";
@@ -42,6 +42,10 @@ const REMINDERS: { value: number | null; label: string }[] = [
   { value: 1440, label: "1 day before" },
 ];
 
+// "Every day" / "Every 7 days (weekly)" … for a repeat interval in days.
+const repeatLabel = (n: number) =>
+  n === 1 ? "Every day" : `Every ${n} days${n === 7 ? " (weekly)" : n === 14 ? " (fortnightly)" : n === 30 ? " (monthly)" : ""}`;
+
 // "YYYY-MM-DD" -> "Nov 5", built from parts so server and browser agree.
 const shortDate = (d: string) => {
   const [y, m, day] = d.split("-").map(Number);
@@ -74,6 +78,7 @@ function Meta({ t, today, badge }: { t: TaskFull; today: string; badge?: string 
       {badge && <span className="rounded-full bg-accent-soft px-2 text-accent-text">{badge}</span>}
       <DueChip due={t.due} time={t.dueTime} today={today} done={t.status === "done"} />
       {t.remindAt && t.status !== "done" && <Bell size={12} weight="bold" className="text-ink-3" aria-label="Reminder set" />}
+      {t.repeatEvery && <ArrowsClockwise size={12} weight="bold" className="text-ink-3" aria-label={repeatLabel(t.repeatEvery)} />}
       {t.subtasks.length > 0 && (
         <span className="inline-flex items-center gap-1 text-ink-3"><CheckSquare size={12} weight="bold" aria-hidden /> {doneSubs}/{t.subtasks.length}</span>
       )}
@@ -720,8 +725,49 @@ function AddColumn({ groupId }: { groupId: string }) {
   );
 }
 
-// Task details: title, status, due date/time and reminder, subtasks, labels,
-// notes, delete. A bottom sheet on phones, a panel from the right on larger screens.
+// Repeat interval: a switch to turn it on, then a 1–30 day slider. The slider
+// tracks locally while dragging and commits on release. Keyed by task id in the
+// sheet, so it reinitialises when another task opens.
+function RepeatControl({ task, pending, save }: { task: TaskFull; pending: boolean; save: (v: number | null) => void }) {
+  const [repeat, setRepeat] = useState<number | null>(task.repeatEvery);
+  const commit = (e: React.SyntheticEvent<HTMLInputElement>) => save(Number(e.currentTarget.value));
+  return (
+    <section className="space-y-2">
+      <h3 className="label">Repeat</h3>
+      <label className="flex cursor-pointer items-center gap-2.5">
+        <input
+          type="checkbox"
+          role="switch"
+          className="switch"
+          checked={repeat !== null}
+          disabled={pending}
+          onChange={(e) => { const v = e.target.checked ? (repeat ?? 1) : null; setRepeat(v); save(v); }}
+        />
+        <span className="text-sm">{repeat !== null ? repeatLabel(repeat) : "Does not repeat"}</span>
+      </label>
+      {repeat !== null && (
+        <>
+          <input
+            type="range"
+            min={1}
+            max={30}
+            value={repeat}
+            aria-label="Repeat every (days)"
+            aria-valuetext={repeatLabel(repeat)}
+            onChange={(e) => setRepeat(Number(e.target.value))}
+            onPointerUp={commit}
+            onKeyUp={commit}
+            className="w-full accent-accent-strong"
+          />
+          <p className="text-xs text-ink-3">Finishing it schedules the next one{task.due ? "" : " from today"}.</p>
+        </>
+      )}
+    </section>
+  );
+}
+
+// Task details: title, status, due date/time and reminder, repeat, subtasks,
+// labels, notes, delete. A bottom sheet on phones, a panel from the right on larger screens.
 function TaskSheet({ task, today, locale, labels, columns, move, onClose }: {
   task: TaskFull | null; today: string; locale: string; labels: Label[]; columns: TaskColumn[]; move: Move; onClose: () => void;
 }) {
@@ -842,6 +888,8 @@ function TaskSheet({ task, today, locale, labels, columns, move, onClose }: {
               <p className="text-xs text-ink-3">Notifications are blocked in this browser — reminders will show inside the app.</p>
             )}
           </section>
+
+          <RepeatControl key={task.id} task={task} pending={pending} save={(v) => run(() => updateTaskAction(task.id, { repeatEvery: v }))} />
 
           <section className="space-y-2">
             <h3 className="label">Subtasks</h3>
